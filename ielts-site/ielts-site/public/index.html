@@ -49,7 +49,7 @@ function hl(el){el.addEventListener('mouseup',()=>{const s=getSelection();if(s.i
 /* ---------- Talaba paneli ---------- */
 async function student(note=''){const uid=auth.currentUser.uid,q=n=>getDocs(query(collection(db,n),where('uid','==',uid)));
  const [ms,ps,as,rs]=await Promise.all([col('mocks'),q('permissions'),q('attempts'),q('results')]);
- const P={},T={},R={};ps.forEach(d=>P[d.id]=d.data().granted);as.forEach(d=>T[d.id]=d.data());rs.forEach(d=>R[d.id]=d.data());
+ const P={},T={},R={};ps.forEach(d=>P[d.data().sectionId||d.id]=d.data().granted);as.forEach(d=>T[d.data().sectionId||d.id]=d.data());rs.forEach(d=>R[d.data().sectionId||d.id]=d.data());
  const cell=(m,t)=>{const sid=m.id+'_'+t,a=T[sid],r=R[sid];
   if(a?.status==='submitted')return `<span class=tag>Topshirilgan</span> ${r?`${r.raw!=null?r.raw+'/'+r.total+' · ':''}Band ${r.band}`:''}`;
   if(a)return `<button onclick="A.open('${sid}')">Davom etish</button>`;
