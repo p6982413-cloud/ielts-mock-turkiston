@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SMART USTOZ AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.383.0/dist/umd/lucide.min.js"></script>
+<style>
+:root{--bg:#07111F;--bg2:#0C192B;--card:#11243A;--cy:#35D6E8;--pu:#9275FF;--ok:#35D49A;--wa:#FFBF69;--er:#FF667D;--tx:#F4F8FF;--tx2:#9AAEC4;--line:rgba(154,174,196,.16);--r:16px;--sh:0 10px 30px rgba(0,0,0,.35)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:Manrope,system-ui,sans-serif;background:var(--bg);color:var(--tx);line-height:1.55;overflow-x:hidden}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0}
+:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
+.side{position:fixed;inset:0 auto 0 0;width:255px;background:var(--bg2);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:20px 14px;z-index:30;transition:transform .3s}
+.logo{display:flex;gap:12px;align-items:center;padding:0 8px 18px}
+.logo svg{flex:none}
+.logo b{display:block;font-weight:800;letter-spacing:.3px}
+.logo small{color:var(--tx2);font-size:12px}
+.nav{flex:1;overflow-y:auto}
+.grp{font-size:12px;color:var(--tx2);font-weight:700;padding:16px 10px 6px}
+.ni{position:relative;display:flex;gap:12px;align-items:center;width:100%;padding:10px 12px;border-radius:12px;color:var(--tx2);font-weight:600;font-size:14.5px;text-align:left;transition:.2s}
+.ni:hover{color:var(--tx);background:rgba(53,214,232,.06)}
+.ni.on{color:var(--tx);background:rgba(53,214,232,.12)}
+.ni.on i,.ni.on svg{color:var(--cy)}
+.ni.on::before{content:"";position:absolute;left:-14px;top:8px;bottom:8px;width:4px;border-radius:0 4px 4px 0;background:var(--cy)}
+.ni svg{width:19px;height:19px}
+.me{display:flex;gap:10px;align-items:center;padding:12px 8px 0;border-top:1px solid var(--line)}
+.av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--cy),var(--pu));display:grid;place-items:center;font-weight:800;color:#07111F;flex:none}
+.me div{flex:1;min-width:0}.me small{color:var(--tx2);font-size:12px;display:block}
+.ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:var(--tx2);transition:.2s;flex:none}
+.ic:hover{background:rgba(255,255,255,.07);color:var(--tx)}
+.ic svg{width:19px;height:19px}
+.main{margin-left:255px;min-height:100%}
+.top{position:sticky;top:0;height:76px;display:flex;align-items:center;gap:14px;padding:0 32px;background:rgba(7,17,31,.78);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);z-index:20}
+.menu{display:none}
+.crumb{color:var(--tx2);font-size:14px;white-space:nowrap}.crumb b{color:var(--tx)}
+.search{margin-left:auto;position:relative;width:min(380px,40%)}
+.search input{width:100%;height:44px;border-radius:12px;background:var(--card);border:1px solid var(--line);padding:0 14px 0 42px;outline:0}
+.search input:focus{border-color:var(--cy)}
+.search svg{position:absolute;left:13px;top:12px;width:19px;height:19px;color:var(--tx2)}
+.dot{position:relative}.dot::after{content:"";position:absolute;top:9px;right:10px;width:8px;height:8px;border-radius:50%;background:var(--er)}
+.page{padding:28px 32px 60px;max-width:1280px}
+.hero{position:relative;overflow:hidden;border-radius:24px;border:1px solid var(--line);background:radial-gradient(900px 400px at 85% 40%,rgba(53,214,232,.16),transparent 60%),radial-gradient(600px 300px at 10% 100%,rgba(146,117,255,.18),transparent 60%),var(--bg2);min-height:340px;display:flex;align-items:center}
+.hero canvas{position:absolute;inset:0;width:100%;height:100%}
+.hero .tx{position:relative;padding:48px;max-width:560px}
+h1{font-size:clamp(32px,4.4vw,52px);line-height:1.08;font-weight:800;letter-spacing:-1px}
+.hero p{color:var(--tx2);margin:16px 0 26px;font-size:17px}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.btn{height:48px;padding:0 22px;border-radius:12px;font-weight:700;display:inline-flex;gap:9px;align-items:center;transition:.2s}
+.btn svg{width:18px;height:18px}
+.pri{background:var(--cy);color:#04202A}.pri:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.sec{border:1px solid var(--line);background:rgba(255,255,255,.04)}.sec:hover{border-color:var(--cy)}
+.btn:active{transform:scale(.97)}
+.lab{position:absolute;right:6%;top:50%;transform:translateY(-50%);width:min(320px,34%)}
+.sh{display:flex;justify-content:space-between;align-items:end;margin:34px 0 14px}
+.sh h2{font-size:22px;font-weight:800}.sh span{color:var(--tx2);font-size:14px}
+.grid{display:grid;gap:16px}
+.g4{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.g3{grid-template-columns:repeat(auto-fill,minmax(290px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;transition:.25s}
+.card:hover{transform:translateY(-3px);box-shadow:var(--sh);border-color:rgba(53,214,232,.35)}
+.st{display:flex;gap:14px;align-items:center}
+.st .bx{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:rgba(53,214,232,.12);color:var(--cy)}
+.st .bx svg{width:22px;height:22px}
+.num{font-size:30px;font-weight:800;line-height:1}
+.st small{color:var(--tx2);font-size:13px}
+.bar{height:6px;border-radius:6px;background:rgba(255,255,255,.08);margin-top:16px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;border-radius:6px;background:linear-gradient(90deg,var(--cy),var(--pu));transition:width 1.1s cubic-bezier(.2,.8,.2,1)}
+.book{display:flex;gap:20px;align-items:stretch}
+.cover{width:112px;flex:none;border-radius:12px;background:linear-gradient(160deg,#1c3b66,#0b2340 60%,#2a1d5c);padding:12px;display:flex;flex-direction:column;justify-content:space-between;border:1px solid var(--line)}
+.cover b{font-size:20px;color:var(--cy)}.cover small{font-size:11px;color:var(--tx2)}
+.meta{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px}
+.bd{font-size:12.5px;padding:4px 10px;border-radius:99px;font-weight:700;background:rgba(154,174,196,.12);color:var(--tx2)}
+.bd.ok{background:rgba(53,214,232,.13);color:var(--cy)}
+.bd.e{background:rgba(53,212,154,.14);color:var(--ok)}.bd.m{background:rgba(255,191,105,.14);color:var(--wa)}.bd.h{background:rgba(255,102,125,.14);color:var(--er)}
+.qa{text-align:left;position:relative;overflow:hidden;min-height:150px;display:flex;flex-direction:column;justify-content:flex-end;gap:4px}
+.qa .ib{position:absolute;top:16px;right:16px;width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:var(--c);color:#06121f;opacity:.92}
+.qa::before{content:"";position:absolute;width:170px;height:170px;border-radius:50%;right:-50px;top:-60px;background:var(--c);opacity:.13;filter:blur(8px)}
+.qa b{font-size:17px}.qa small{color:var(--tx2)}
+.two{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+.li{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.li:last-child{border:0}
+.n{width:38px;height:38px;border-radius:11px;flex:none;display:grid;place-items:center;font-weight:800;font-size:13px;background:rgba(146,117,255,.16);color:#bfb0ff}
+.empty{color:var(--tx2);padding:14px 0}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.chip{padding:8px 15px;border-radius:99px;border:1px solid var(--line);color:var(--tx2);font-weight:600;font-size:14px}
+.chip.on{background:rgba(53,214,232,.14);color:var(--cy);border-color:var(--cy)}
+.tc{text-align:left;width:100%;border-left:4px solid var(--c,var(--cy))}
+.tc h3{font-size:16.5px;margin:10px 0 6px;line-height:1.3}
+.tc small{color:var(--tx2)}
+.tc .ft{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+.soon{display:grid;place-items:center;text-align:center;min-height:50vh;color:var(--tx2)}
+.soon svg{width:46px;height:46px;color:var(--cy);margin-bottom:12px}.soon h2{color:var(--tx);margin-bottom:6px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,30px);background:var(--card);border:1px solid var(--cy);padding:12px 20px;border-radius:12px;opacity:0;transition:.3s;z-index:60;box-shadow:var(--sh);pointer-events:none;max-width:90vw}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.sc{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:25}
+@media(max-width:1000px){.lab{display:none}.two{grid-template-columns:1fr}}
+@media(max-width:860px){.side{transform:translateX(-100%)}.side.open{transform:none}.side.open~.sc{display:block}.main{margin-left:0}.menu{display:grid}.top{padding:0 14px}.page{padding:18px 14px 80px}.crumb{display:none}.search{width:auto;flex:1;margin-left:0}.hero .tx{padding:30px 22px}.book{flex-direction:column}.cover{width:100%;height:110px}.btn,.ic,.ni{min-height:44px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.fl{animation:fl 5s ease-in-out infinite}@keyframes fl{50%{transform:translateY(-8px)}}
+.bub{animation:bb 3s ease-in infinite}@keyframes bb{from{transform:translateY(0);opacity:.9}to{transform:translateY(-60px);opacity:0}}
+</style>
+</head>
+<body>
+<aside class="side" id="side">
+  <div class="logo">
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="6" fill="#35D6E8"/><circle cx="7" cy="10" r="4" fill="#9275FF"/><circle cx="33" cy="12" r="3.5" fill="#35D49A"/><circle cx="30" cy="33" r="4" fill="#9275FF"/><path d="M20 20L7 10M20 20l13-8M20 20l10 13" stroke="#9AAEC4" stroke-width="1.6"/></svg>
+    <div><b>SMART USTOZ AI</b><small>Raqamli ta'lim laboratoriyasi</small></div>
+  </div>
+  <nav class="nav" id="nav"></nav>
+  <div class="me"><div class="av">U</div><div><b>Ustoz</b><small>O'qituvchi</small></div><button class="ic" title="Chiqish" aria-label="Chiqish" data-t="Chiqish tez orada qo'shiladi"><i data-lucide="log-out"></i></button></div>
+</aside>
+<div class="sc" id="sc"></div>
+<div class="main">
+  <header class="top">
+    <button class="ic menu" id="menu" aria-label="Menyuni ochish"><i data-lucide="menu"></i></button>
+    <div class="crumb" id="crumb"></div>
+    <label class="search"><i data-lucide="search"></i><input id="q" type="search" placeholder="Mavzu qidirish…" aria-label="Qidiruv"></label>
+    <button class="ic dot" aria-label="Bildirishnomalar" data-t="Yangi bildirishnoma yo'q"><i data-lucide="bell"></i></button>
+    <button class="ic" aria-label="Yordam" data-t="Yordam bo'limi tez orada"><i data-lucide="circle-help"></i></button>
+    <button class="ic" aria-label="Mavzu" id="theme" data-t="Hozircha faqat qorong'i mavzu mavjud"><i data-lucide="moon"></i></button>
+    <div class="av" aria-hidden="true">U</div>
+  </header>
+  <main class="page" id="page"></main>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const CH=["I bob. Organik kimyoning tuzilish nazariyasi","II bob. Uglevodorodlar","III bob. Kislorodli organik birikmalar","IV bob. Azotli organik birikmalar"];
+const COL=["#35D6E8","#9275FF","#FFBF69","#35D49A"];
+const D={b:"Boshlang'ich",o:"O'rta",q:"Qiyin"};
+const T=[[1,"Organik kimyo tarixi. Organik birikmalarning o'ziga xos xususiyatlari","b"],[2,"Organik moddalarning tuzilish nazariyasi","o"],[3,"Izomeriya va uning turlari","o"],[4,"Organik birikmalar sinflanishi va reaksiya turlari","o"],[5,"Alkanlarning gomologik qatori. Ratsional nomenklatura","b"],[6,"Alkanlarning IUPAC nomenklaturasi. Izomeriyasi","o"],[7,"Alkanlarning olinishi va fizik xossalari","o"],[8,"Alkanlarning kimyoviy xossasi. Ishlatilishi","o"],[9,"Sikloalkanlar. Nomenklaturasi, izomeriyasi, olinishi","o"],[10,"Sikloalkanlarning fizik va kimyoviy xossalari","q"],[11,"Alkenlar va ularning nomenklaturasi","b"],[12,"Alkenlarning izomeriyasi va olinishi","q"],[13,"Alkenlarning fizik va kimyoviy xossalari","o"],[14,"Alkadienlar. Olinishi va xossalari","o"],[15,"Alkinlar. Olinishi va xossalari","o"],[16,"Aromatik uglevodorodlar","q"],[17,"Uglerod atomining gibridlanishi","q"],[18,"Neft va neftni qayta ishlash mahsulotlari","b"],[19,"Tabiiy gaz va toshko'mir","b"],[20,"Spirtlar. Bir atomli spirtlarning nomenklaturasi va olinishi","o"],[21,"Bir atomli spirtlarning xossalari. Ishlatilishi","o"],[22,"Ko'p atomli spirtlar","o"],[23,"Fenollar va aromatik spirtlar","o"],[24,"Oksobirikmalar. Aldegidlar","o"],[25,"Ketonlar","o"],[26,"Karbon kislotalar","o"],[27,"Oddiy efirlar","b"],[28,"Murakkab efirlar","o"],[29,"Yog'lar","o"],[30,"Uglevodlar. Monosaxaridlar","q"],[31,"Disaxaridlar va polisaxaridlar","o"],[32,"Nitrobirikmalar","o"],[33,"Aminlar va aromatik aminlar","o"],[34,"Aminokislotalar va oqsillar","q"],[35,"Yuqori molekulyar birikmalar","o"]].map(([n,t,d])=>({n,t,d,c:n<=4?0:n<=19?1:n<=31?2:3}));
+const seen=[];
+const NAV=[["ASOSIY",[["home","Bosh sahifa","home"],["books","Mening kitoblarim","book-open"],["topics","Barcha mavzular","layers"]]],
+["TA'LIM RESURSLARI",[["games","Interaktiv o'yinlar","gamepad-2"],["lab","Virtual laboratoriya","flask-conical"],["lessons","Ochiq darslar","presentation"],["tests","Test va topshiriqlar","clipboard-check"],["table","Mendeleyev jadvali","grid-3x3"]]],
+["BOSHQARUV",[["results","O'quvchilar natijalari","bar-chart-3"],["saved","Saqlangan materiallar","bookmark"],["settings","Sozlamalar","settings"]]]];
+const NAMES={};NAV.forEach(g=>g[1].forEach(i=>NAMES[i[0]]=i));
+let cur="home",filter="",chap=-1;
+const $=s=>document.querySelector(s);
+function ico(){window.lucide&&lucide.createIcons()}
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove("on"),2400)}
+function renderNav(){$("#nav").innerHTML=NAV.map(([g,items])=>`<div class="grp">${g}</div>`+items.map(([k,n,i])=>`<button class="ni ${k===cur?"on":""}" data-go="${k}"><i data-lucide="${i}"></i>${n}</button>`).join("")).join("");ico()}
+function go(k){cur=k;$("#side").classList.remove("open");renderNav();$("#crumb").innerHTML=`SMART USTOZ AI / <b>${NAMES[k][1]}</b>`;const p=$("#page");({home,topics,books}[k]||soon)(p);ico();scrollTo(0,0);p.querySelectorAll(".bar i").forEach(b=>requestAnimationFrame(()=>b.style.width=b.dataset.w+"%"))}
+const stat=(i,n,t,w,tot)=>`<div class="card st-c"><div class="st"><div class="bx"><i data-lucide="${i}"></i></div><div><div class="num">${n}</div><small>${t}</small></div></div><div class="bar"><i data-w="${w}"></i></div></div>`;
+function topicCard(t){const dc={b:"e",o:"m",q:"h"}[t.d];const s=seen.includes(t.n);return `<button class="card tc" style="--c:${COL[t.c]}" data-topic="${t.n}"><span class="bd">${t.n}-§</span> <span class="bd ${dc}">${D[t.d]}</span><h3>${t.t}</h3><small>${CH[t.c]}</small><div class="ft"><span class="bd ok">1 ta o'yin g'oyasi</span><span class="bd ${s?"e":""}">${s?"Ko'rildi":"Boshlanmagan"}</span></div></button>`}
+function home(p){
+const book=`<div class="card book"><div class="cover"><b>Kimyo</b><small>10-sinf<br>Organik kimyo</small></div><div style="flex:1"><h3 style="font-size:19px">Kimyo-10. Organik kimyo</h3><div class="meta"><span class="bd">160 bet</span><span class="bd">4 bob</span><span class="bd">35 mavzu</span><span class="bd ok">Tahlil: 100%</span></div><div class="bar"><i data-w="100"></i></div><div class="row" style="margin-top:16px"><button class="btn pri" data-go="topics"><i data-lucide="folder-open"></i>Ochish</button></div></div></div>`;
+const qa=[["lab","Virtual laboratoriya","Tajribalarni xavfsiz o'tkazing","flask-conical","#35D6E8"],["table","Mendeleyev jadvali","118 ta element","grid-3x3","#9275FF"],["games","O'yinlar markazi","10 xil o'yin","gamepad-2","#FFBF69"],["lessons","Ochiq dars yaratish","Slaydlar va dars rejasi","presentation","#35D49A"]].map(([k,t,s,i,c])=>`<button class="card qa" style="--c:${c}" data-go="${k}"><span class="ib"><i data-lucide="${i}"></i></span><b>${t}</b><small>${s}</small></button>`).join("");
+const act=seen.length?seen.slice(-4).reverse().map(n=>{const t=T[n-1];return `<div class="li"><div class="n">${n}</div><div><b>${t.t}</b><br><small style="color:var(--tx2)">${CH[t.c]}</small></div></div>`}).join(""):`<div class="empty">Hali mavzu ochilmagan. «Barcha mavzular» bo'limidan boshlang.</div>`;
+p.innerHTML=`<section class="hero"><canvas id="cv"></canvas>
+<div class="tx"><h1>Kimyoni kashf eting!</h1><p>Kitoblaringizni interaktiv darslar, virtual tajribalar va qiziqarli o'yinlarga aylantiring.</p><div class="row"><button class="btn pri" data-t="Kitob yuklash keyingi qadamda qo'shiladi"><i data-lucide="upload"></i>Yangi kitob yuklash</button><button class="btn sec" data-go="lab"><i data-lucide="flask-conical"></i>Laboratoriyaga o'tish</button></div></div>
+<svg class="lab fl" viewBox="0 0 320 280" fill="none" aria-hidden="true"><defs><linearGradient id="lq" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#35D6E8"/><stop offset="1" stop-color="#9275FF"/></linearGradient></defs><ellipse cx="160" cy="262" rx="110" ry="12" fill="#35D6E8" opacity=".12"/><path d="M130 20h60v8h-6v70l62 118c8 16-2 34-20 34H94c-18 0-28-18-20-34l62-118V28h-6z" fill="rgba(255,255,255,.06)" stroke="#9AAEC4" stroke-width="2.5"/><path d="M104 188h112l22 42c5 10-2 20-12 20H94c-10 0-17-10-12-20z" fill="url(#lq)" opacity=".85"/><circle class="bub" cx="140" cy="200" r="6" fill="#fff" opacity=".7"/><circle class="bub" style="animation-delay:1s" cx="172" cy="210" r="4" fill="#fff" opacity=".7"/><circle class="bub" style="animation-delay:2s" cx="195" cy="195" r="5" fill="#fff" opacity=".7"/></svg></section>
+<div class="sh"><h2>Umumiy ko'rsatkichlar</h2></div><div class="grid g4">${stat("book-open",1,"Mening kitoblarim",100)}${stat("layers",seen.length+" / 35","O'rganilgan mavzular",Math.round(seen.length/35*100))}${stat("gamepad-2",35,"Tayyor o'yin g'oyalari",100)}${stat("presentation",0,"O'tkazilgan darslar",0)}</div>
+<div class="sh"><h2>So'nggi kitoblar</h2></div>${book}
+<div class="sh"><h2>Tezkor kirish</h2></div><div class="grid g4">${qa}</div>
+<div class="two"><div><div class="sh"><h2>So'nggi faoliyat</h2></div><div class="card">${act}</div></div><div><div class="sh"><h2>Tavsiya etilgan mavzular</h2></div><div class="card">${T.filter(t=>t.d==="b").slice(0,4).map(t=>`<div class="li"><div class="n">${t.n}</div><button style="text-align:left" data-topic="${t.n}"><b>${t.t}</b></button></div>`).join("")}</div></div></div>`;
+heroFx()}
+function topics(p){
+const list=T.filter(t=>(chap<0||t.c===chap)&&(t.t+" "+t.n).toLowerCase().includes(filter));
+p.innerHTML=`<div class="sh" style="margin-top:0"><div><h1 style="font-size:32px">Barcha mavzular</h1><span>Kimyo-10. Organik kimyo · ${list.length} ta mavzu</span></div></div><div class="tools"><button class="chip ${chap<0?"on":""}" data-ch="-1">Barcha boblar</button>${CH.map((c,i)=>`<button class="chip ${chap===i?"on":""}" data-ch="${i}">${c.split(".")[0]}</button>`).join("")}</div><div class="grid g3">${list.map(topicCard).join("")||`<div class="empty">Hech narsa topilmadi. Boshqa so'z bilan qidirib ko'ring.</div>`}</div>`}
+function books(p){p.innerHTML=`<div class="sh" style="margin-top:0"><div><h1 style="font-size:32px">Mening kitoblarim</h1><span>Yuklangan darsliklaringiz va o'quv materiallaringiz.</span></div></div><div class="card" style="border:2px dashed rgba(53,214,232,.4);text-align:center;padding:44px 20px"><i data-lucide="file-up" style="width:48px;height:48px;color:#35D6E8"></i><h3 style="margin:12px 0 4px">PDF kitobingizni shu yerga tashlang</h3><small style="color:var(--tx2)">Yoki qurilmangizdan fayl tanlang</small></div><div class="sh"><h2>Kitoblar</h2></div><div class="card book"><div class="cover"><b>Kimyo</b><small>10-sinf</small></div><div><h3>Kimyo-10. Organik kimyo</h3><div class="meta"><span class="bd">160 bet</span><span class="bd">4 bob</span><span class="bd">35 mavzu</span></div><button class="btn pri" data-go="topics">Mavzularni ochish</button></div></div>`}
+function soon(p){const n=NAMES[cur];p.innerHTML=`<div class="soon"><div><i data-lucide="${n[2]}"></i><h2>${n[1]}</h2><p>Bu bo'lim keyingi qadamda quriladi.</p></div></div>`}
+function heroFx(){const c=$("#cv");if(!c)return;const x=c.getContext("2d"),r=c.getBoundingClientRect();c.width=r.width;c.height=r.height;
+const N=innerWidth<700?18:34,P=[...Array(N)].map(()=>({x:Math.random()*c.width,y:Math.random()*c.height,vx:(Math.random()-.5)*.35,vy:(Math.random()-.5)*.35,r:2+Math.random()*3,c:["#35D6E8","#9275FF","#35D49A"][Math.floor(Math.random()*3)]}));
+const rm=matchMedia("(prefers-reduced-motion:reduce)").matches;
+function f(){if(!c.isConnected)return;x.clearRect(0,0,c.width,c.height);P.forEach((a,i)=>{if(!rm){a.x+=a.vx;a.y+=a.vy;if(a.x<0||a.x>c.width)a.vx*=-1;if(a.y<0||a.y>c.height)a.vy*=-1}
+for(let j=i+1;j<N;j++){const b=P[j],d=Math.hypot(a.x-b.x,a.y-b.y);if(d<120){x.strokeStyle=`rgba(154,174,196,${.25*(1-d/120)})`;x.beginPath();x.moveTo(a.x,a.y);x.lineTo(b.x,b.y);x.stroke()}}
+x.fillStyle=a.c;x.globalAlpha=.75;x.beginPath();x.arc(a.x,a.y,a.r,0,7);x.fill();x.globalAlpha=1});if(!rm)requestAnimationFrame(f)}f()}
+document.addEventListener("click",e=>{
+const g=e.target.closest("[data-go]"),t=e.target.closest("[data-topic]"),h=e.target.closest("[data-ch]"),m=e.target.closest("[data-t]");
+if(g)return go(g.dataset.go);
+if(t){const n=+t.dataset.topic;if(!seen.includes(n))seen.push(n);toast(`${n}-§ ochildi. Mavzu ish maydoni keyingi qadamda qo'shiladi.`);return go(cur==="home"?"home":"topics")}
+if(h){chap=+h.dataset.ch;return go("topics")}
+if(m)toast(m.dataset.t)});
+$("#menu").onclick=()=>$("#side").classList.add("open");
+$("#sc").onclick=()=>$("#side").classList.remove("open");
+$("#q").addEventListener("input",e=>{filter=e.target.value.trim().toLowerCase();if(cur!=="topics"){cur="topics";renderNav();$("#crumb").innerHTML="SMART USTOZ AI / <b>Barcha mavzular</b>"}topics($("#page"));ico()});
+addEventListener("resize",()=>{if(cur==="home")heroFx()});
+addEventListener("load",ico);
+renderNav();go("home");
+</script>
+</body>
+</html>

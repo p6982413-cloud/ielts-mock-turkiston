@@ -1,0 +1,173 @@
+<!doctype html><html lang="uz"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>IELTS Mock Exam</title>
+<style>
+:root{--n:#0b1f3a;--b:#2563eb;--l:#eef4ff}*{box-sizing:border-box}
+body{margin:0;font:15px system-ui,sans-serif;color:#0f172a;background:#f4f7fb}
+header{background:var(--n);color:#fff;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.wrap{max-width:1100px;margin:24px auto;padding:0 16px}.card{background:#fff;border-radius:14px;padding:20px;box-shadow:0 2px 12px #0b1f3a14;margin-bottom:16px;overflow:auto}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+input,select,textarea,button{font:inherit;padding:9px 12px;border-radius:9px;border:1px solid #cbd5e1;width:100%;margin:4px 0}
+button{width:auto;background:var(--b);color:#fff;border:0;cursor:pointer;transition:.2s}button.s{background:#e2e8f0;color:#0f172a}button:hover{filter:brightness(1.1)}
+table{width:100%;border-collapse:collapse}td,th{padding:8px;border-bottom:1px solid #e2e8f0;text-align:left;vertical-align:top}
+.tag{padding:2px 9px;border-radius:99px;background:var(--l);font-size:12px}.ok{color:#15803d}.no{color:#b91c1c}
+.exam{position:fixed;inset:0;background:#fff;display:flex;flex-direction:column;z-index:9}
+.bar{background:var(--n);color:#fff;padding:10px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.bar button{margin:0}.bar b{margin-left:auto;font-size:20px}
+.split{flex:1;display:flex;overflow:hidden}.split>div{flex:1;overflow:auto;padding:18px}.split>div:first-child{border-right:2px solid #e2e8f0}
+.nav{padding:8px 12px;border-top:1px solid #e2e8f0;display:flex;gap:6px;flex-wrap:wrap}.nav a{padding:4px 10px;border-radius:99px;background:#e2e8f0;cursor:pointer}.nav a.d{background:var(--b);color:#fff}
+mark{background:#fde047;cursor:pointer}.exam input[type=text],.exam select{width:auto;display:inline-block;margin:2px}
+@media(max-width:800px){.split{flex-direction:column}}
+</style></head><body><div id="app"></div>
+<script type="module">
+import {getAuth,signInWithEmailAndPassword,signOut,onAuthStateChanged,createUserWithEmailAndPassword,doc,getDoc,setDoc,updateDoc,deleteDoc,addDoc,collection,getDocs,query,where,serverTimestamp} from "./db.js";
+const $=s=>document.querySelector(s),app=$('#app'),DOM='@ielts-mock.uz',A=window.A={};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const auth=getAuth(),db={},sa={};
+const ts=t=>t?.toDate?t.toDate().toLocaleString('uz'):'-',norm=s=>String(s??'').trim().toLowerCase().replace(/\s+/g,' ');
+const log=a=>addDoc(collection(db,'log'),{a,t:serverTimestamp()}).catch(()=>{});
+const col=n=>getDocs(collection(db,n)),wc=s=>(s.trim().match(/\S+/g)||[]).length;
+const SEC=['listening','reading','writing'];
+
+/* ---------- Kirish ---------- */
+function landing(msg=''){app.innerHTML=`<header><b>IELTS MOCK EXAM</b></header><div class=wrap><div class=card><h2>Computer-based IELTS mock imtihon platformasi</h2><p>Listening, Reading va Writing — haqiqiy kompyuter imtihoniga o'xshash muhitda.</p><p class=no>${msg}</p></div><div class=grid><div class=card><h3>Talaba kirishi</h3><input id=sl placeholder="Login kodi"><input id=sp type=password placeholder="Parol"><button onclick="A.login(0)">Kirish</button></div><div class=card><h3>Admin kirishi</h3><input id=ae placeholder="Admin email"><input id=ap type=password placeholder="Parol"><button onclick="A.login(1)">Kirish</button></div></div></div>`}
+A.login=async adm=>{try{await signInWithEmailAndPassword(auth,adm?$('#ae').value.trim():$('#sl').value.trim().toLowerCase()+DOM,adm?$('#ap').value:$('#sp').value)}catch(e){landing("Login yoki parol noto'g'ri")}};
+A.out=()=>signOut(auth);
+let me={};
+onAuthStateChanged(auth,async u=>{if(!u)return landing();
+ if(u.admin)return admin('stats');
+ const s=await getDoc(doc(db,'students',u.uid)).catch(()=>null);
+ if(s?.exists()&&s.data().active){me=s.data();return student()}
+ await signOut(auth);landing("Hisob faol emas yoki topilmadi")});
+
+/* ---------- Xavfsiz render (skriptlar o'chiriladi) ---------- */
+function clean(html){const d=new DOMParser().parseFromString(html||'','text/html');
+ d.querySelectorAll('script,iframe,object,embed,link,style,base,meta').forEach(e=>e.remove());
+ d.querySelectorAll('*').forEach(e=>[...e.attributes].forEach(a=>{if(/^on/i.test(a.name)||/^\s*(javascript|data):/i.test(a.value)&&a.name!='src')e.removeAttribute(a.name)}));return d.body}
+function hl(el){el.addEventListener('mouseup',()=>{const s=getSelection();if(s.isCollapsed||!s.rangeCount)return;const r=s.getRangeAt(0);
+ if(!el.contains(r.commonAncestorContainer)||r.commonAncestorContainer.nodeName=='TEXTAREA')return;
+ try{const m=document.createElement('mark');r.surroundContents(m)}catch(e){}s.removeAllRanges()});
+ el.addEventListener('click',e=>{if(e.target.tagName=='MARK'){const m=e.target;m.replaceWith(...m.childNodes)}})}
+
+/* ---------- Talaba paneli ---------- */
+async function student(note=''){const uid=auth.currentUser.uid,q=n=>getDocs(query(collection(db,n),where('uid','==',uid)));
+ const [ms,ps,as,rs]=await Promise.all([col('mocks'),q('permissions'),q('attempts'),q('results')]);
+ const P={},T={},R={};ps.forEach(d=>P[d.id]=d.data().granted);as.forEach(d=>T[d.id]=d.data());rs.forEach(d=>R[d.id]=d.data());
+ const cell=(m,t)=>{const sid=m.id+'_'+t,a=T[sid],r=R[sid];
+  if(a?.status==='submitted')return `<span class=tag>Topshirilgan</span> ${r?`${r.raw!=null?r.raw+'/'+r.total+' · ':''}Band ${r.band}`:''}`;
+  if(a)return `<button onclick="A.open('${sid}')">Davom etish</button>`;
+  return P[sid]?`<button onclick="A.start('${m.id}','${t}')">START</button>`:'<span class=tag>Kutilmoqda</span>'};
+ app.innerHTML=`<header><b>IELTS MOCK EXAM</b><span>${esc(me.name)} · <span class=tag style="color:#000">Tizimda</span> <button class=s onclick="A.out()">Chiqish</button></span></header><div class=wrap>
+ ${note?`<div class=card><b>${note}</b></div>`:''}${Object.values(P).some(Boolean)||Object.keys(T).length?'':'<div class=card>Admin tomonidan test ishlashga ruxsat berilishi kutilmoqda.</div>'}
+ <div class=card><h3>Mavjud mock imtihonlar va tarix</h3><table><tr><th>Mock</th><th>Listening</th><th>Reading</th><th>Writing</th></tr>
+ ${ms.docs.map(m=>`<tr><td>${esc(m.data().title)}<br><small>${esc(m.data().date||'')}</small></td>${SEC.map(t=>`<td>${cell(m,t)}</td>`).join('')}</tr>`).join('')}</table></div></div>`}
+A.start=async(mid,t)=>{const uid=auth.currentUser.uid,sid=mid+'_'+t;
+ try{await setDoc(doc(db,'attempts',uid+'_'+sid),{uid,sectionId:sid,mockId:mid,type:t,startedAt:serverTimestamp(),status:'in_progress',answers:{}})}
+ catch(e){return alert("Boshlab bo'lmadi: ruxsat yo'q yoki bo'lim allaqachon boshlangan")}A.open(sid)};
+
+A.open=async sid=>{const aid=auth.currentUser.uid+'_'+sid;
+ const [as,ss]=await Promise.all([getDoc(doc(db,'attempts',aid)),getDoc(doc(db,'sections',sid))]);
+ const at=as.data(),sc=ss.data();if(at.status!=='in_progress')return student();
+ const start=at.startedAt.toMillis(),end=start+36e5,t=sc.type,ans=at.answers||{};let done=false,aud=null;
+ const ex=document.createElement('div');ex.className='exam';
+ ex.innerHTML=`<div class=bar><b style="margin:0">${t.toUpperCase()}</b><button class=s id=fs>To'liq ekran</button><span id=sv></span><b id=tm></b><button id=sb>Topshirish</button></div><div class=split><div id=L></div><div id=R></div></div><div class=nav id=nv></div>`;
+ document.body.append(ex);ex.requestFullscreen?.().catch(()=>{});$('#fs').onclick=()=>ex.requestFullscreen?.();
+ const L=$('#L'),R=$('#R'),nv=$('#nv'),mount=(el,h)=>{el.append(...clean(h).childNodes);hl(el)};
+ const restore=()=>ex.querySelectorAll('[name^=q]').forEach(e=>{const v=ans[e.name.slice(1)];if(v==null)return;e.type=='radio'?e.checked=e.value==v:e.type=='checkbox'?e.checked=String(v).split(',').includes(e.value):e.value=v});
+ let col2=()=>({});
+ if(t=='listening'){L.innerHTML=`<h3>Listening</h3><p>Audio avtomatik ijro etiladi. To'xtatish, oldinga/orqaga surish va tezlikni o'zgartirish mumkin emas.</p><div id=au></div>`;mount(R,sc.html);
+  Promise.resolve(sc.audio||Promise.reject()).then(url=>{aud=new Audio('/'+String(url).replace(/^\/+/,''));const exp=()=>(Date.now()-start)/1000;
+   aud.onloadedmetadata=()=>{aud.currentTime=Math.min(exp(),aud.duration);aud.play().catch(()=>$('#au').innerHTML='<button id=pa>Audioni yoqish</button>',$('#au').onclick=()=>aud.play())};
+   aud.onpause=()=>{if(!done&&!aud.ended)aud.play().catch(()=>{})};aud.onratechange=()=>aud.playbackRate=1;
+   setInterval(()=>{if(!done&&!aud.ended&&Math.abs(aud.currentTime-exp())>3)aud.currentTime=exp()},1000)}).catch(()=>L.innerHTML+='<p class=no>Audio topilmadi</p>')}
+ if(t=='reading'){const D=[1,2,3].map(i=>clean(sc['p'+i])),Lp=[],Rp=[];
+  L.innerHTML='<div class=nav id=pt style="border:0;padding:0 0 10px"></div>';R.innerHTML='';
+  D.forEach((d,i)=>{const a=document.createElement('div'),b=document.createElement('div');a.append(d.querySelector('#passage')||d);const q=d.querySelector('#questions');if(q)b.append(q);hl(a);hl(b);L.append(a);R.append(b);Lp.push(a);Rp.push(b)});
+  const show=i=>{Lp.forEach((e,j)=>{e.hidden=Rp[j].hidden=j!=i});[...$('#pt').children].forEach((x,j)=>x.className=j==i?'d':'')};
+  $('#pt').innerHTML=[1,2,3].map(i=>`<a>Passage ${i}</a>`).join('');[...$('#pt').children].forEach((x,j)=>x.onclick=()=>show(j));show(0)}
+ if(t=='writing'){const tk=(n,h)=>`<div class=tk id=k${n}><h3>Task ${n}${n==1?' ('+sc.kind+')':''}</h3>${n==1?'<img id=im style="max-width:100%">':''}<p style="white-space:pre-wrap"></p></div>`;
+  L.innerHTML=`<div class=nav style="border:0;padding:0 0 10px"><a id=b1>Task 1</a><a id=b2>Task 2</a></div>${tk(1)}${tk(2)}`;
+  $('#k1 p').textContent=sc.t1;$('#k2 p').textContent=sc.t2;sc.img?$('#im').src=sc.img:$('#im').remove();
+  R.innerHTML=`<textarea id=w1 style="height:70%" spellcheck=false></textarea><textarea id=w2 style="height:70%" spellcheck=false hidden></textarea><p id=wcn></p>`;
+  $('#w1').value=ans.t1||'';$('#w2').value=ans.t2||'';
+  const cnt=()=>{const a=wc($('#w1').value),b=wc($('#w2').value);$('#wcn').innerHTML=`Task 1: ${a} so'z${a<150?' <span class=no>(kamida 150)</span>':''} · Task 2: ${b} so'z${b<250?' <span class=no>(kamida 250)</span>':''} · Jami: ${a+b} · Belgilar: ${$('#w1').value.length}/${$('#w2').value.length}`};
+  const sh=n=>{[1,2].forEach(i=>{$('#k'+i).hidden=$('#w'+i).hidden=i!=n;$('#b'+i).className=i==n?'d':''})};
+  $('#b1').onclick=()=>sh(1);$('#b2').onclick=()=>sh(2);sh(1);ex.addEventListener('input',cnt);cnt();col2=()=>({t1:$('#w1').value,t2:$('#w2').value})}
+ else{restore();const names=[...new Set([...ex.querySelectorAll('[name^=q]')].map(e=>e.name).filter(n=>/^q\d+$/.test(n)))].sort((a,b)=>a.slice(1)-b.slice(1));
+  col2=()=>{const o={};ex.querySelectorAll('[name^=q]').forEach(e=>{const n=e.name.slice(1);if(!/^\d+$/.test(n))return;
+   if(e.type=='radio'){if(e.checked)o[n]=e.value}else if(e.type=='checkbox'){if(e.checked)o[n]=(o[n]?o[n]+',':'')+e.value}else if(e.value)o[n]=e.value});return o};
+  const paint=()=>{const a=col2();nv.innerHTML=names.map(n=>`<a class="${a[n.slice(1)]?'d':''}" data-n="${n}">${n.slice(1)}</a>`).join('')};
+  nv.onclick=e=>{const n=e.target.dataset?.n;if(n)ex.querySelector(`[name=${n}]`)?.scrollIntoView({block:'center'})};ex.addEventListener('input',paint);paint()}
+ const submit=async auto=>{if(done)return;if(!auto&&!confirm('Topshirishni tasdiqlaysizmi? Keyin o\'zgartirib bo\'lmaydi.'))return;
+  done=true;clearInterval(tm);clearInterval(sv);aud?.pause();
+  try{await updateDoc(doc(db,'attempts',aid),{answers:col2(),status:'submitted',submittedAt:serverTimestamp()})}catch(e){alert('Saqlashda xato: '+e.message)}
+  ex.remove();document.exitFullscreen?.().catch(()=>{});student("Bo'lim topshirildi. Keyingi bo'lim uchun admin ruxsatini kuting.")};
+ $('#sb').onclick=()=>submit(false);
+ const tm=setInterval(()=>{const r=Math.max(0,end-Date.now());$('#tm').textContent=String(Math.floor(r/6e4)).padStart(2,'0')+':'+String(Math.floor(r/1e3)%60).padStart(2,'0');if(r<=0)submit(true)},1000);
+ const sv=setInterval(()=>{if(!done)updateDoc(doc(db,'attempts',aid),{answers:col2()}).then(()=>$('#sv').textContent='Saqlandi ✓').catch(()=>$('#sv').textContent='Saqlanmadi!')},10000)};
+
+/* ---------- Admin paneli ---------- */
+async function admin(tab){const tabs=[['stats','Statistika'],['st','Talabalar'],['mk','Mocklar'],['pm','Ruxsatlar'],['rs','Natijalar']];
+ app.innerHTML=`<header><b>IELTS MOCK · Admin</b><span>${tabs.map(t=>`<button class="${t[0]==tab?'':'s'}" onclick="A.tab('${t[0]}')">${t[1]}</button>`).join(' ')} <button class=s onclick="A.out()">Chiqish</button></span></header><div class=wrap id=pg>Yuklanmoqda…</div>`;await A['t_'+tab]()}
+A.tab=admin;const pg=h=>$('#pg').innerHTML=h;
+A.t_stats=async()=>{const [s,m,a,l]=await Promise.all([col('students'),col('mocks'),col('attempts'),col('log')]);const at=a.docs.map(d=>d.data());
+ pg(`<div class=grid>${[['Talabalar',s.size],['Mocklar',m.size],['Hozir imtihonda',at.filter(x=>x.status=='in_progress').length],['Yakunlangan',at.filter(x=>x.status=='submitted').length]].map(x=>`<div class=card><small>${x[0]}</small><h1>${x[1]}</h1></div>`).join('')}</div>
+ <div class=card><h3>Faollik jurnali</h3><table>${l.docs.map(d=>d.data()).sort((a,b)=>(b.t?.seconds||0)-(a.t?.seconds||0)).slice(0,15).map(x=>`<tr><td>${ts(x.t)}</td><td>${esc(x.a)}</td></tr>`).join('')}</table></div>`)};
+let SD=[];
+A.t_st=async()=>{SD=(await col('students')).docs.map(d=>({id:d.id,...d.data()}));
+ pg(`<div class=card><h3>Yangi talaba</h3><div class=grid><input id=n placeholder="To'liq ism"><input id=g placeholder="Guruh"><input id=lg placeholder="Login kodi"><input id=ps placeholder="Parol (kamida 6)"></div><button class=s onclick="A.gen()">Avto yaratish</button> <button onclick="A.addSt()">Qo'shish</button></div>
+ <div class=card><input id=q placeholder="Ism yoki guruh bo'yicha qidirish" oninput="A.rows()"><table id=sr></table></div>`);A.rows()};
+A.rows=()=>{const q=norm($('#q')?.value);$('#sr').innerHTML='<tr><th>Ism</th><th>Login</th><th>Guruh</th><th>Holat</th><th></th></tr>'+SD.filter(s=>norm(s.name+s.group).includes(q)).map(s=>`<tr><td>${esc(s.name)}</td><td>${esc(s.login)}</td><td>${esc(s.group)}</td><td>${s.active?'Faol':'Nofaol'}</td><td><button class=s onclick="A.tg('${s.id}',${!s.active})">${s.active?"O'chirish":'Yoqish'}</button> <button class=s onclick="A.ed('${s.id}')">Tahrir</button> <button class=s onclick="A.del('${s.id}')">×</button></td></tr>`).join('')};
+A.gen=()=>{const r=n=>Math.random().toString(36).slice(2,2+n);$('#lg').value='s'+Math.floor(1000+Math.random()*9000);$('#ps').value=r(8)};
+A.addSt=async()=>{const name=$('#n').value.trim(),login=$('#lg').value.trim().toLowerCase(),pass=$('#ps').value;if(!name||!login||pass.length<6)return alert("Ism, login va parol (6+) kerak");
+ try{const c=await createUserWithEmailAndPassword(sa,login+DOM,pass);await signOut(sa);
+  await setDoc(doc(db,'students',c.user.uid),{name,login,group:$('#g').value.trim(),active:true,createdAt:serverTimestamp()});log("Talaba qo'shildi: "+name);alert(`Login: ${login}\nParol: ${pass}`);A.t_st()}catch(e){alert(e.message)}};
+A.tg=async(id,v)=>{await updateDoc(doc(db,'students',id),{active:v});log('Talaba holati: '+id);A.t_st()};
+A.ed=async id=>{const s=SD.find(x=>x.id==id),n=prompt('Ism',s.name);if(n==null)return;const g=prompt('Guruh',s.group||'');await updateDoc(doc(db,'students',id),{name:n,group:g||''});A.t_st()};
+A.del=async id=>{if(confirm("O'chirilsinmi?")){await deleteDoc(doc(db,'students',id));log("Talaba o'chirildi");A.t_st()}};
+
+const keys=t=>{const m={};t.split('\n').forEach(l=>{const x=l.match(/^\s*(\d+)\s*[=:.)\-\s]\s*(.+)$/);if(x)m[x[1]]=x[2].split('/').map(norm).filter(Boolean)});return m};
+A.t_mk=async()=>{const ms=await col('mocks'),f=(id,l,a='')=>`<label>${l}<input type=file id=${id} accept="${a}"></label>`;
+ pg(`<div class=card><h3>Yangi mock</h3><div class=grid><input id=mt placeholder="Sarlavha"><input id=mn placeholder="Raqam"><input id=md type=date><input id=mdesc placeholder="Tavsif"></div>
+ <h4>Listening</h4>${f('lh','HTML test','.html')}<input id=la placeholder="Audio fayl yo'li, masalan: audio/mock1.mp3"><textarea id=lk rows=4 placeholder="Javob kaliti: 1=B  2=cat/cats"></textarea>
+ <h4>Reading</h4>${f('r1','Passage 1 HTML','.html')}${f('r2','Passage 2 HTML','.html')}${f('r3','Passage 3 HTML','.html')}<textarea id=rk rows=4 placeholder="1=iii  14=TRUE ..."></textarea>
+ <h4>Writing</h4><select id=wk><option>Academic</option><option>General Training</option></select>${f('wi','Task 1 rasm','image/*')}<textarea id=w1 rows=3 placeholder="Task 1 ko'rsatma"></textarea><textarea id=w2 rows=3 placeholder="Task 2 esse savoli"></textarea>
+ <button onclick="A.saveMock()">Saqlash</button></div>
+ <div class=card><table>${ms.docs.map(d=>`<tr><td>${esc(d.data().title)}</td><td>${esc(d.data().date||'')}</td><td><button class=s onclick="A.delMock('${d.id}')">O'chirish</button></td></tr>`).join('')}</table></div>`)};
+A.saveMock=async()=>{const f=id=>$('#'+id).files[0],v=id=>$('#'+id).value,tx=x=>x?x.text():'';if(!v('mt'))return alert('Sarlavha kerak');
+ const m=await addDoc(collection(db,'mocks'),{title:v('mt'),number:v('mn'),date:v('md'),desc:v('mdesc'),createdAt:serverTimestamp()}),id=m.id;
+ const [L,R,W]=SEC.map(s=>id+'_'+s);
+ try{await setDoc(doc(db,'sections',L),{mockId:id,type:'listening',html:await tx(f('lh')),audio:v('la').trim()});await setDoc(doc(db,'keys',L),{map:keys(v('lk'))});
+  await setDoc(doc(db,'sections',R),{mockId:id,type:'reading',p1:await tx(f('r1')),p2:await tx(f('r2')),p3:await tx(f('r3'))});await setDoc(doc(db,'keys',R),{map:keys(v('rk'))});
+  await setDoc(doc(db,'sections',W),{mockId:id,type:'writing',kind:v('wk'),t1:v('w1'),t2:v('w2'),img:f('wi')?await new Promise(r=>{const x=new FileReader();x.onload=()=>r(x.result);x.readAsDataURL(f('wi'))}):''});
+  log('Mock yaratildi: '+v('mt'));A.t_mk()}catch(e){alert('Xato: '+e.message)}};
+A.delMock=async id=>{if(!confirm("O'chirilsinmi?"))return;for(const s of SEC){await deleteDoc(doc(db,'sections',id+'_'+s));await deleteDoc(doc(db,'keys',id+'_'+s))}await deleteDoc(doc(db,'mocks',id));log("Mock o'chirildi");A.t_mk()};
+
+let SM='';
+A.t_pm=async()=>{const [ms,ss,ps,as]=await Promise.all([col('mocks'),col('students'),col('permissions'),col('attempts')]);SM=SM||ms.docs[0]?.id||'';
+ const P={},T={};ps.forEach(d=>P[d.id]=d.data().granted);as.forEach(d=>T[d.id]=d.data().status);
+ pg(`<div class=card><select onchange="SM=this.value;A.t_pm()">${ms.docs.map(d=>`<option value=${d.id} ${d.id==SM?'selected':''}>${esc(d.data().title)}</option>`).join('')}</select>
+ <table><tr><th>Talaba</th>${SEC.map(s=>`<th>${s}</th>`).join('')}</tr>${ss.docs.map(s=>`<tr><td>${esc(s.data().name)}</td>${SEC.map(t=>{const sid=SM+'_'+t,k=s.id+'_'+sid,g=P[k];
+ return `<td>${T[k]=='submitted'?'Topshirgan':T[k]?'Jarayonda':''}<br><button class="${g?'':'s'}" onclick="A.perm('${s.id}','${sid}',${!g})">${g?'Ruxsat ✓':'Ruxsat berish'}</button></td>`}).join('')}</tr>`).join('')}</table></div>`)};
+window.SM=SM;Object.defineProperty(window,'SM',{get:()=>SM,set:v=>SM=v});
+A.perm=async(uid,sid,g)=>{await setDoc(doc(db,'permissions',uid+'_'+sid),{uid,sectionId:sid,mockId:sid.split('_')[0],granted:g});log(`Ruxsat ${g?'berildi':'olindi'}: ${sid}`);A.t_pm()};
+
+const BT=[[39,9],[37,8.5],[35,8],[33,7.5],[30,7],[27,6.5],[23,6],[19,5.5],[15,5],[13,4.5],[10,4],[8,3.5],[6,3],[4,2.5]];
+const band=(raw,tot)=>(BT.find(t=>Math.round(raw*40/tot)>=t[0])||[0,2])[1];
+A.t_rs=async()=>{const [a,s,ms]=await Promise.all([col('attempts'),col('students'),col('mocks')]),N={},M={};s.forEach(d=>N[d.id]=d.data().name);ms.forEach(d=>M[d.id]=d.data().title);
+ pg(`<div class=card><button class=s onclick="A.csv()">CSV eksport</button><table><tr><th>Talaba</th><th>Mock</th><th>Bo'lim</th><th>Holat</th><th>Boshlangan</th><th></th></tr>${a.docs.map(d=>d.data()?{id:d.id,...d.data()}:0).map(x=>`<tr><td>${esc(N[x.uid])}</td><td>${esc(M[x.mockId])}</td><td>${x.type}</td><td>${x.status}</td><td>${ts(x.startedAt)}</td><td><button onclick="A.view('${x.id}')">Ko'rish</button></td></tr>`).join('')}</table></div>`)};
+A.view=async aid=>{const at=(await getDoc(doc(db,'attempts',aid))).data(),a=at.answers||{};
+ if(at.type=='writing'){const fbk=(await getDoc(doc(db,'feedback',aid))).data()||{},c=['Task Achievement/Response','Coherence & Cohesion','Lexical Resource','Grammatical Range & Accuracy'];
+  return pg(`<div class=card><button class=s onclick="A.tab('rs')">← Orqaga</button><h3>Writing · topshirilgan: ${ts(at.submittedAt)}</h3><h4>Task 1 (${wc(a.t1||'')} so'z)</h4><p style="white-space:pre-wrap">${esc(a.t1)}</p><h4>Task 2 (${wc(a.t2||'')} so'z)</h4><p style="white-space:pre-wrap">${esc(a.t2)}</p>
+  ${c.map((x,i)=>`<label>${x}<input class=fc type=number step=.5 min=0 max=9 value="${fbk.c?.[i]??''}"></label>`).join('')}<textarea id=fcm rows=4 placeholder="Izoh">${esc(fbk.comment)}</textarea><button onclick="A.saveW('${aid}')">Saqlash</button></div>`)}
+ const k=(await getDoc(doc(db,'keys',at.sectionId))).data()?.map||{},nums=Object.keys(k).map(Number).sort((x,y)=>x-y);let c=0,w=0,b=0;
+ const rows=nums.map(n=>{const g=norm(a[n]),ok=g&&k[n].includes(g);g?(ok?c++:w++):b++;return `<tr><td>${n}</td><td>${esc(a[n]||'—')}</td><td>${esc(k[n].join(' / '))}</td><td class="${ok?'ok':'no'}">${!g?'Javobsiz':ok?"To'g'ri":"Noto'g'ri"}</td></tr>`}).join('');
+ pg(`<div class=card><button class=s onclick="A.tab('rs')">← Orqaga</button><h3>${at.type} natijasi</h3><p>Jami: ${nums.length} · To'g'ri: ${c} · Noto'g'ri: ${w} · Javobsiz: ${b} · Taxminiy band: <b>${band(c,nums.length||40)}</b></p>
+ <label>Band'ni qo'lda o'zgartirish (ixtiyoriy)<input id=ov type=number step=.5 min=0 max=9></label><button onclick="A.saveR('${aid}',${c},${w},${b},${nums.length},${band(c,nums.length||40)})">Natijani saqlash va talabaga ko'rsatish</button>
+ <table><tr><th>#</th><th>Talaba</th><th>Kalit</th><th></th></tr>${rows}</table></div>`)};
+A.saveR=async(aid,c,w,b,total,bd)=>{const at=(await getDoc(doc(db,'attempts',aid))).data(),ov=$('#ov').value;
+ await setDoc(doc(db,'results',aid),{uid:at.uid,sectionId:at.sectionId,mockId:at.mockId,type:at.type,correct:c,wrong:w,blank:b,total,raw:c,band:ov!==''?+ov:bd,manual:ov!=='',t:serverTimestamp()});log('Natija saqlandi: '+aid);alert('Saqlandi')};
+A.saveW=async aid=>{const at=(await getDoc(doc(db,'attempts',aid))).data(),c=[...document.querySelectorAll('.fc')].map(x=>x.value===''?null:+x.value),v=c.filter(x=>x!=null),
+ avg=v.length==4?Math.round(v.reduce((x,y)=>x+y,0)/4*2)/2:null;
+ await setDoc(doc(db,'feedback',aid),{uid:at.uid,c,comment:$('#fcm').value});if(avg!=null)await setDoc(doc(db,'results',aid),{uid:at.uid,sectionId:at.sectionId,mockId:at.mockId,type:'writing',band:avg,manual:true});log('Writing baholandi: '+aid);alert('Saqlandi')};
+A.csv=async()=>{const [r,s]=await Promise.all([col('results'),col('students')]),N={};s.forEach(d=>N[d.id]=d.data().name);
+ const l=['Talaba,Bo\'lim,To\'g\'ri,Noto\'g\'ri,Javobsiz,Jami,Band',...r.docs.map(d=>d.data()).map(x=>[N[x.uid],x.sectionId,x.correct,x.wrong,x.blank,x.total,x.band].map(v=>`"${v??''}"`).join(','))].join('\n');
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+l],{type:'text/csv'}));a.download='natijalar.csv';a.click()};
+</script></body></html>
