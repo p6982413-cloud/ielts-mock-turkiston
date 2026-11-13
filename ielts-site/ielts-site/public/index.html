@@ -274,24 +274,92 @@ A.perm=async(uid,sid,g)=>{await setDoc(doc(db,'permissions',uid+'_'+sid),{uid,se
  
 const BT=[[39,9],[37,8.5],[35,8],[33,7.5],[30,7],[27,6.5],[23,6],[19,5.5],[15,5],[13,4.5],[10,4],[8,3.5],[6,3],[4,2.5]];
 const band=(raw,tot)=>(BT.find(t=>Math.round(raw*40/tot)>=t[0])||[0,2])[1];
-A.t_rs=async()=>{const [a,s,ms]=await Promise.all([col('attempts'),col('students'),col('mocks')]),N={},M={};s.forEach(d=>N[d.id]=d.data().name);ms.forEach(d=>M[d.id]=d.data().title);
- pg(`<div class=card><button class=s onclick="A.csv()">CSV eksport</button><table><tr><th>Talaba</th><th>Mock</th><th>Bo'lim</th><th>Holat</th><th>Boshlangan</th><th></th></tr>${a.docs.map(d=>d.data()?{id:d.id,...d.data()}:0).map(x=>`<tr><td>${esc(N[x.uid])}</td><td>${esc(M[x.mockId])}</td><td>${x.type}</td><td>${x.status}</td><td>${ts(x.startedAt)}</td><td><button onclick="A.view('${x.id}')">Ko'rish</button></td></tr>`).join('')}</table></div>`)};
-A.view=async aid=>{const at=(await getDoc(doc(db,'attempts',aid))).data(),a=at.answers||{};
- if(at.type=='writing'){const fbk=(await getDoc(doc(db,'feedback',aid))).data()||{},c=['Task Achievement/Response','Coherence & Cohesion','Lexical Resource','Grammatical Range & Accuracy'];
-  return pg(`<div class=card><button class=s onclick="A.tab('rs')">← Orqaga</button><h3>Writing · topshirilgan: ${ts(at.submittedAt)}</h3><h4>Task 1 (${wc(a.t1||'')} so'z)</h4><p style="white-space:pre-wrap">${esc(a.t1)}</p><h4>Task 2 (${wc(a.t2||'')} so'z)</h4><p style="white-space:pre-wrap">${esc(a.t2)}</p>
-  ${c.map((x,i)=>`<label>${x}<input class=fc type=number step=.5 min=0 max=9 value="${fbk.c?.[i]??''}"></label>`).join('')}<textarea id=fcm rows=4 placeholder="Izoh">${esc(fbk.comment)}</textarea><button onclick="A.saveW('${aid}')">Saqlash</button></div>`)}
- const k=(await getDoc(doc(db,'keys',at.sectionId))).data()?.map||{},nums=Object.keys(k).map(Number).sort((x,y)=>x-y);let c=0,w=0,b=0;
- const rows=nums.map(n=>{const g=norm(a[n]),ok=g&&k[n].includes(g);g?(ok?c++:w++):b++;return `<tr><td>${n}</td><td>${esc(a[n]||'—')}</td><td>${esc(k[n].join(' / '))}</td><td class="${ok?'ok':'no'}">${!g?'Javobsiz':ok?"To'g'ri":"Noto'g'ri"}</td></tr>`}).join('');
- pg(`<div class=card><button class=s onclick="A.tab('rs')">← Orqaga</button><h3>${at.type} natijasi</h3><p>Jami: ${nums.length} · To'g'ri: ${c} · Noto'g'ri: ${w} · Javobsiz: ${b} · Taxminiy band: <b>${band(c,nums.length||40)}</b></p>
- <label>Band'ni qo'lda o'zgartirish (ixtiyoriy)<input id=ov type=number step=.5 min=0 max=9></label><button onclick="A.saveR('${aid}',${c},${w},${b},${nums.length},${band(c,nums.length||40)})">Natijani saqlash va talabaga ko'rsatish</button>
- <table><tr><th>#</th><th>Talaba</th><th>Kalit</th><th></th></tr>${rows}</table></div>`)};
-A.saveR=async(aid,c,w,b,total,bd)=>{const at=(await getDoc(doc(db,'attempts',aid))).data(),ov=$('#ov').value;
- await setDoc(doc(db,'results',aid),{uid:at.uid,sectionId:at.sectionId,mockId:at.mockId,type:at.type,correct:c,wrong:w,blank:b,total,raw:c,band:ov!==''?+ov:bd,manual:ov!=='',t:serverTimestamp()});log('Natija saqlandi: '+aid);alert('Saqlandi')};
-A.saveW=async aid=>{const at=(await getDoc(doc(db,'attempts',aid))).data(),c=[...document.querySelectorAll('.fc')].map(x=>x.value===''?null:+x.value),v=c.filter(x=>x!=null),
- avg=v.length==4?Math.round(v.reduce((x,y)=>x+y,0)/4*2)/2:null;
- await setDoc(doc(db,'feedback',aid),{uid:at.uid,c,comment:$('#fcm').value});if(avg!=null)await setDoc(doc(db,'results',aid),{uid:at.uid,sectionId:at.sectionId,mockId:at.mockId,type:'writing',band:avg,manual:true});log('Writing baholandi: '+aid);alert('Saqlandi')};
-A.csv=async()=>{const [r,s]=await Promise.all([col('results'),col('students')]),N={};s.forEach(d=>N[d.id]=d.data().name);
- const l=['Talaba,Bo\'lim,To\'g\'ri,Noto\'g\'ri,Javobsiz,Jami,Band',...r.docs.map(d=>d.data()).map(x=>[N[x.uid],x.sectionId,x.correct,x.wrong,x.blank,x.total,x.band].map(v=>`"${v??''}"`).join(','))].join('\n');
+/* ===== Natijalar (admin): mock → sana → talaba → 3 bo'lim → PDF ===== */
+document.head.insertAdjacentHTML('beforeend','<style>'+
+'.pn:not(.all) tr.okr{display:none}.pn.hid{display:none}.lk{cursor:pointer;color:var(--b);font-weight:700}'+
+'#rep{display:none}'+
+'@media print{body>*:not(#rep){display:none!important}#rep{display:block!important;color:#000;background:#fff;font:13px/1.5 Arial,sans-serif}@page{margin:14mm}}'+
+'#rep h1{margin:0;font-size:22px}#rep h2{font-size:16px;margin:18px 0 6px;border-bottom:2px solid #888;padding-bottom:3px}#rep h3{font-size:14px;margin:12px 0 4px}'+
+'#rep table{width:100%;border-collapse:collapse;margin:6px 0}#rep th,#rep td{border:1px solid #999;padding:4px 8px;text-align:left;background:#fff;color:#000}#rep th{background:#eee}#rep tr{page-break-inside:avoid}'+
+'#rep .tx{white-space:pre-wrap;border:1px solid #bbb;padding:8px;margin:4px 0}#rep .hd{display:flex;align-items:center;gap:12px}#rep .hd img{width:54px;height:54px;border-radius:50%}'+
+'</style>');
+const dkey=t=>{if(!t?.toDate)return '';const d=t.toDate(),p=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())},
+ fd=s=>s?String(s).split('-').reverse().join('.'):'—',CR=['Task Achievement/Response','Coherence & Cohesion','Lexical Resource','Grammatical Range & Accuracy'];
+let RS={v:'m',mock:'',date:'',q:'',tab:'writing',sm:'',su:'',back:'m',cur:[],S:{}},RD={N:{},G:{},M:{},A:[]},RES={},RK={},ATT={};
+async function rload(){
+ const [a,s,ms,r]=await Promise.all([col('attempts'),col('students'),col('mocks'),col('results')]);
+ RD={N:{},G:{},M:{},A:[]};s.forEach(d=>{RD.N[d.id]=d.data().name;RD.G[d.id]=d.data().group||''});ms.forEach(d=>RD.M[d.id]=d.data());
+ RES={};r.forEach(d=>RES[d.id]=d.data());
+ ATT={};a.forEach(d=>{ATT[d.id]={id:d.id,...d.data()}});RD.A=Object.values(ATT);
+ RK=await col('keys').then(k=>{const o={};k.forEach(d=>o[d.id]=d.data().map||{});return o}).catch(async()=>{const o={};for(const m of ms.docs)for(const t of ['listening','reading']){const d=await getDoc(doc(db,'keys',m.id+'_'+t)).catch(()=>null);if(d&&d.exists())o[d.id]=d.data().map||{}}return o})}
+/* bitta urinishni kalit bilan tekshirish */
+const grade=at=>{const k=RK[at.sectionId];if(!k)return null;const a=at.answers||{},nums=Object.keys(k).map(Number).sort((x,y)=>x-y);let c=0,w=0,b=0;
+ const rows=nums.map(n=>{const g=norm(a[n]),ok=!!g&&k[n].includes(g);g?(ok?c++:w++):b++;return{n,given:a[n]||'',key:k[n].join(' / '),ok,blank:!g}});
+ return{rows,c,w,b,tot:nums.length,bd:band(c,nums.length||40)}};
+/* bo'lim bahosi: {st:-|prog|wait|ok, band, auto, g} */
+const sb=at=>{if(!at)return{st:'-'};if(at.status!=='submitted')return{st:'prog'};const r=RES[at.id];
+ if(at.type=='writing')return r?.band!=null?{st:'ok',band:r.band}:{st:'wait'};
+ const g=grade(at);if(r?.band!=null)return{st:'ok',band:r.band,g};return g?{st:'ok',band:g.bd,auto:1,g}:{st:'wait'}};
+const ovl=g=>{const b=SEC.map(t=>sb(g.S[t]).band);return b.every(x=>x!=null)?Math.round(b.reduce((x,y)=>x+y)/3*2)/2:null};
+const cell2=at=>{const s=sb(at);if(s.st=='-')return '<span class=mut>—</span>';if(s.st=='prog')return '<span class=tag>Jarayonda</span>';if(s.st=='wait')return '<span class=tag>Baholanmagan</span>';
+ return `<b>${s.band}</b>${s.g?` <small>${s.g.c}/${s.g.tot}</small>`:''}${s.auto?' <small>*</small>':''}`};
+/* (talaba, mock) bo'yicha guruhlash; date berilsa faqat o'sha kuni boshlanganlar */
+function rrows(mock,date,q){const G={};
+ RD.A.forEach(a=>{if(mock&&a.mockId!=mock)return;if(date&&dkey(a.startedAt)!=date)return;const k=a.uid+'|'+a.mockId,g=G[k]=G[k]||{uid:a.uid,mockId:a.mockId,t:0,d:'',S:{}};g.S[a.type]=a;const t=a.startedAt?.toMillis?.()||0;if(t>=g.t){g.t=t;g.d=dkey(a.startedAt)}});
+ return Object.values(G).filter(g=>norm((RD.N[g.uid]||'')+' '+(RD.G[g.uid]||'')).includes(norm(q))).sort((x,y)=>y.t-x.t||String(RD.N[x.uid]).localeCompare(String(RD.N[y.uid])))}
+function rtbl(){const full=RS.v=='a',rows=rrows(full?'':RS.mock,full?'':RS.date,RS.q);RS.cur=rows;
+ $('#rt').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><b>${rows.length} ta talaba</b><button class=s onclick="A.csv()">CSV eksport</button></div>`+
+ (rows.length?`<table><tr><th>Talaba</th><th>Guruh</th>${full?'<th>Mock</th>':''}<th>Sana</th><th>🎧 Listening</th><th>📖 Reading</th><th>✍️ Writing</th><th>Umumiy</th></tr>${rows.map(g=>`<tr><td><a class=lk onclick="A.stu('${g.mockId}','${g.uid}')">${esc(RD.N[g.uid]||'—')}</a></td><td>${esc(RD.G[g.uid]||'')}</td>${full?`<td>${esc(RD.M[g.mockId]?.title||'—')}</td>`:''}<td>${fd(g.d)}</td>${SEC.map(t=>`<td>${cell2(g.S[t])}</td>`).join('')}<td><b>${ovl(g)??'—'}</b></td></tr>`).join('')}</table>`:'<p class=mut>Bu yerda hali hech kim ishlamagan</p>')+
+ `<p class=mut><small>* — avtomatik hisoblangan band, talabaga hali ko'rsatilmagan (talaba ismini bosib, "Natijani saqlash" ni bosing). "Baholanmagan" — Writing hali tekshirilmagan.</small></p>`}
+function rview(){const v=RS.v;
+ if(v=='m'){const C={};RD.A.forEach(a=>{const c=C[a.mockId]=C[a.mockId]||{u:new Set(),n:0};c.u.add(a.uid);c.n++});
+  const ms=Object.entries(RD.M).sort((x,y)=>String(y[1].date||'').localeCompare(String(x[1].date||'')));
+  pg(`<div class=card style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><div><h3 style="margin:0">Mockni tanlang</h3><p class=mut style="margin:2px 0 0">Mock ustiga bosing — qaysi sanada kimlar ishlaganini ko'rasiz</p></div><button class=s onclick="A.ra()">📋 Umumiy jadval</button></div>
+  <div class=g3>${ms.map(([id,m])=>`<div class=st style="cursor:pointer" onclick="A.rm('${id}')"><small>${m.date?fd(m.date):'—'}</small><h3 style="margin:6px 0">${esc(m.title)}</h3><p class=mut>${C[id]?.u.size||0} talaba · ${C[id]?.n||0} urinish</p></div>`).join('')||"<p class=mut>Hali mock yo'q</p>"}</div>`);return}
+ if(v=='a'){pg(`<div class=card><button class=s onclick="A.rb()">← Mocklar</button><h3 style="margin-top:10px">Umumiy natijalar (barcha mocklar)</h3><input id=rq value="${esc(RS.q)}" placeholder="Ism yoki guruh bo'yicha qidirish" oninput="A.rq(this.value)"></div><div class=card id=rt></div>`);rtbl();return}
+ if(v=='k'){const m=RD.M[RS.mock]||{},ds={};RD.A.filter(a=>a.mockId==RS.mock).forEach(a=>{const d=dkey(a.startedAt);(ds[d]=ds[d]||new Set()).add(a.uid)});
+  pg(`<div class=card><button class=s onclick="A.rb()">← Mocklar</button><h3 style="margin-top:10px">${esc(m.title)}</h3><div class=grid><label>Sana<select onchange="A.rd(this.value)"><option value="">Barcha sanalar</option>${Object.keys(ds).sort().reverse().map(d=>`<option value="${d}" ${d==RS.date?'selected':''}>${fd(d)} (${ds[d].size} talaba)</option>`).join('')}</select></label><label>Qidirish<input id=rq value="${esc(RS.q)}" placeholder="Ism yoki guruh" oninput="A.rq(this.value)"></label></div></div><div class=card id=rt></div>`);rtbl()}}
+A.t_rs=async()=>{RS.v='m';RS.date='';RS.q='';await rload();rview()};
+A.rm=id=>{RS.mock=id;RS.v='k';RS.date='';RS.q='';rview()};
+A.ra=()=>{RS.v='a';RS.q='';rview()};
+A.rd=v=>{RS.date=v;rtbl()};A.rq=v=>{RS.q=v;rtbl()};
+A.rb=()=>{RS.v=RS.v=='s'?(RS.back||'m'):'m';rview()};
+A.pt=t=>{RS.tab=t;document.querySelectorAll('.pn').forEach(e=>e.classList.toggle('hid',e.id!='pn_'+t));document.querySelectorAll('.tabs a').forEach((e,i)=>e.className=['writing','reading','listening'][i]==t?'d':'')};
+/* ---- bitta talaba: Writing / Reading / Listening ---- */
+A.stu=async(mid,uid,tab)=>{if(RS.v!='s')RS.back=RS.v;RS.v='s';RS.sm=mid;RS.su=uid;if(tab)RS.tab=tab;
+ const aid=t=>uid+'_'+mid+'_'+t,at=t=>ATT[aid(t)],M=RD.M[mid]||{},
+  [ws,fb]=await Promise.all([getDoc(doc(db,'sections',mid+'_writing')).catch(()=>null),getDoc(doc(db,'feedback',aid('writing'))).catch(()=>null)]),
+  S=ws&&ws.exists()?ws.data():{},F=fb&&fb.exists()?fb.data():{};RS.S=S;
+ const wA=at('writing'),wa=wA?.answers||{},
+ wp=!wA?"<p class=mut>Bu bo'lim ishlanmagan</p>":`<p class=mut>Holat: ${wA.status=='submitted'?'topshirilgan · '+ts(wA.submittedAt):'jarayonda (hali topshirmagan)'}</p>`+[1,2].map(i=>`<h4>Task ${i} · ${wc(wa['t'+i]||'')} so'z</h4><div class=box><b>Savol</b><div style="white-space:pre-wrap">${esc(S['t'+i])}</div>${i==1&&/^data:image\//.test(S.img||'')?`<img src="${esc(S.img)}" style="max-width:100%;margin-top:8px">`:''}</div><p style="white-space:pre-wrap;border-left:3px solid var(--b);padding-left:12px">${wa['t'+i]?esc(wa['t'+i]):'<i>Yozilmagan</i>'}</p>`).join('')+(wA.status=='submitted'?`<h4>Baholash</h4>${CR.map((x,i)=>`<label>${x}<input class=fc type=number step=.5 min=0 max=9 value="${F.c?.[i]??''}"></label>`).join('')}<textarea id=fcm rows=4 placeholder="Izoh">${esc(F.comment)}</textarea><button onclick="A.saveW('${wA.id}')">Saqlash</button>`:''),
+ rp=t=>{const a=at(t);if(!a)return "<p class=mut>Bu bo'lim ishlanmagan</p>";if(a.status!=='submitted')return '<p class=mut>Hali topshirilmagan (jarayonda)</p>';const g=grade(a);if(!g)return '<p class=no>Javob kaliti topilmadi</p>';const r=RES[a.id];
+  return `<p>Jami: ${g.tot} · To'g'ri: <b class=ok>${g.c}</b> · Noto'g'ri: <b class=no>${g.w}</b> · Javobsiz: ${g.b} · Band: <b>${r?.band??g.bd}</b>${r?.band==null?' (avtomatik)':''}</p>
+  <div style="display:flex;gap:8px;align-items:end;flex-wrap:wrap"><label>Band'ni qo'lda o'zgartirish (ixtiyoriy)<input id=ov_${a.id} type=number step=.5 min=0 max=9 value="${r?.manual?r.band:''}"></label><button onclick="A.saveR('${a.id}')">Natijani saqlash va talabaga ko'rsatish</button><button class=s onclick="this.closest('.pn').classList.toggle('all')">To'g'rilarni ko'rsatish / yashirish</button></div>
+  ${g.w+g.b==0?"<p class=ok><b>Xato yo'q 🎉</b></p>":''}<table><tr><th>#</th><th>Talaba javobi</th><th>To'g'ri javob</th><th></th></tr>${g.rows.map(x=>`<tr class="${x.ok?'okr':''}"><td>${x.n}</td><td>${esc(x.given||'—')}</td><td>${esc(x.key)}</td><td class="${x.ok?'ok':'no'}">${x.blank?'Javobsiz':x.ok?"To'g'ri":"Noto'g'ri"}</td></tr>`).join('')}</table>`},
+ P={writing:wp,reading:rp('reading'),listening:rp('listening')},L={writing:'✍️ Writing',reading:'📖 Reading',listening:'🎧 Listening'},
+ sm=SEC.map(t=>sb(at(t))),vals=sm.map(s=>s.band!=null?s.band+(s.auto?'*':''):s.st=='prog'?'Jarayonda':s.st=='wait'?'Baholanmagan':'—'),ob=ovl({S:{listening:at('listening'),reading:at('reading'),writing:at('writing')}});
+ pg(`<div class=card><button class=s onclick="A.rb()">← Orqaga</button><h3 style="margin-top:10px">${esc(RD.N[uid]||'—')} · ${esc(M.title)}</h3><p class=mut>${esc(RD.G[uid]||'')}</p><div class=sg>${[['Listening',vals[0]],['Reading',vals[1]],['Writing',vals[2]],['Umumiy',ob??'—']].map(x=>`<div class=sc><small>${x[0]}</small><h2>${x[1]}</h2></div>`).join('')}</div><p style="margin-top:12px"><button onclick="A.pdf()">⬇ PDF yuklash (hammasi bitta faylda)</button></p></div>
+ <div class=card><div class=tabs>${['writing','reading','listening'].map(t=>`<a class="${t==RS.tab?'d':''}" onclick="A.pt('${t}')">${L[t]}</a>`).join('')}</div>${['writing','reading','listening'].map(t=>`<div class="pn ${t==RS.tab?'':'hid'}" id=pn_${t}>${P[t]}</div>`).join('')}</div>`)};
+A.saveR=async aid=>{const at=ATT[aid],g=grade(at),ov=$('#ov_'+aid).value;if(!g)return alert('Javob kaliti topilmadi');
+ const o={uid:at.uid,sectionId:at.sectionId,mockId:at.mockId,type:at.type,correct:g.c,wrong:g.w,blank:g.b,total:g.tot,raw:g.c,band:ov!==''?+ov:g.bd,manual:ov!=='',t:serverTimestamp()};
+ await setDoc(doc(db,'results',aid),o);RES[aid]=o;log('Natija saqlandi: '+aid);alert("Saqlandi — natija talabaga ko'rinadi");A.stu(RS.sm,RS.su)};
+A.saveW=async aid=>{const at=ATT[aid],c=[...document.querySelectorAll('.fc')].map(x=>x.value===''?null:+x.value),v=c.filter(x=>x!=null),avg=v.length==4?Math.round(v.reduce((x,y)=>x+y,0)/4*2)/2:null;
+ await setDoc(doc(db,'feedback',aid),{uid:at.uid,c,comment:$('#fcm').value});
+ if(avg!=null){const o={uid:at.uid,sectionId:at.sectionId,mockId:at.mockId,type:'writing',band:avg,manual:true};await setDoc(doc(db,'results',aid),o);RES[aid]=o}
+ log('Writing baholandi: '+aid);alert('Saqlandi'+(avg!=null?' · Writing band: '+avg:" · (band hisoblanishi uchun 4 ta mezonni ham to'ldiring)"));A.stu(RS.sm,RS.su)};
+/* ---- PDF: chop etish oynasi orqali ("PDF sifatida saqlash") ---- */
+A.pdf=()=>{const mid=RS.sm,uid=RS.su,M=RD.M[mid]||{},S=RS.S||{},nm=RD.N[uid]||'',at=t=>ATT[uid+'_'+mid+'_'+t];
+ const fc=[...document.querySelectorAll('.fc')].map(x=>x.value),cm=$('#fcm')?.value||'',wl=fc.length==4&&fc.every(x=>x!=='')?Math.round(fc.reduce((x,y)=>x+ +y,0)/4*2)/2:null;
+ const sl=sb(at('listening')),sr=sb(at('reading')),sw=sb(at('writing')),wb=wl??sw.band,bs=[sl.band,sr.band,wb],ob=bs.every(x=>x!=null)?Math.round(bs.reduce((x,y)=>x+y)/3*2)/2:null;
+ const gt=t=>{const a=at(t);if(!a)return "<p>Bu bo'lim ishlanmagan.</p>";if(a.status!=='submitted')return '<p>Topshirilmagan.</p>';const g=grade(a);if(!g)return '';const w=g.rows.filter(x=>!x.ok);
+  return `<p>Jami: ${g.tot} · To'g'ri: ${g.c} · Noto'g'ri: ${g.w} · Javobsiz: ${g.b}</p>`+(w.length?`<table><tr><th>#</th><th>Sizning javobingiz</th><th>To'g'ri javob</th></tr>${w.map(x=>`<tr><td>${x.n}</td><td>${esc(x.given||'—')}</td><td>${esc(x.key)}</td></tr>`).join('')}</table>`:"<p>Xato yo'q 🎉</p>")};
+ const wA=at('writing'),wa=wA?.answers||{},
+ wt=!wA?"<p>Bu bo'lim ishlanmagan.</p>":[1,2].map(i=>`<h3>Task ${i} (${wc(wa['t'+i]||'')} so'z)</h3><div class=tx><b>Savol:</b>\n${esc(S['t'+i])}</div><div class=tx>${wa['t'+i]?esc(wa['t'+i]):'<i>Yozilmagan</i>'}</div>`).join('')+(fc.some(x=>x!=='')?`<table><tr>${CR.map(x=>`<th>${x}</th>`).join('')}</tr><tr>${fc.map(x=>`<td>${esc(x)||'—'}</td>`).join('')}</tr></table>`:'')+(cm?`<h3>O'qituvchi izohi</h3><div class=tx>${esc(cm)}</div>`:'');
+ const H=`<div class=hd><img src="${LOGO}" alt=""><div><h1>TURKISTON LC</h1><div>IELTS Mock natijasi</div></div></div><h2>${esc(nm)}</h2><p>Guruh: ${esc(RD.G[uid]||'—')} · Mock: ${esc(M.title||'')}${M.date?' · '+fd(M.date):''}</p><table><tr><th>Listening</th><th>Reading</th><th>Writing</th><th>Umumiy</th></tr><tr><td>${sl.band??'—'}</td><td>${sr.band??'—'}</td><td>${wb??'—'}</td><td><b>${ob??'—'}</b></td></tr></table><h2>Writing</h2>${wt}<h2>Reading — xatolar</h2>${gt('reading')}<h2>Listening — xatolar</h2>${gt('listening')}`;
+ const d=document.createElement('div');d.id='rep';d.innerHTML=H;document.body.append(d);const t0=document.title;document.title='Natija - '+nm+' - '+(M.title||'mock');
+ const fin=()=>{d.remove();document.title=t0;removeEventListener('afterprint',fin)};addEventListener('afterprint',fin);setTimeout(()=>window.print(),100)};
+A.csv=()=>{const r=RS.cur||[],val=at=>{const s=sb(at);return s.band!=null?s.band:s.st=='prog'?'Jarayonda':s.st=='wait'?'Baholanmagan':''};
+ const l=['Talaba,Guruh,Mock,Sana,Listening,Reading,Writing,Umumiy',...r.map(g=>[RD.N[g.uid],RD.G[g.uid],RD.M[g.mockId]?.title,fd(g.d),...SEC.map(t=>val(g.S[t])),ovl(g)??''].map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(','))].join('\n');
  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+l],{type:'text/csv'}));a.download='natijalar.csv';a.click()};
 </script></body></html>
  
