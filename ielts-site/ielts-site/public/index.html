@@ -89,13 +89,13 @@ function build(kind,txt){const j=JSON.parse(txt),k={},ps=[];let n=1;if(!Array.is
   const ak=(m,a)=>{if(a==null||a==='')throw Error(w+": "+m+"-savolda javob (answer) yo'q");k[m]=(Array.isArray(a)?a:String(a).split('/')).map(x=>{x=norm(x);return g.type=='tfng'?norm(TF[x.replace(/\s/g,'')]||x):x})};
   const g2={type:g.type,title:g.title||'',ins:g.instructions||'',img:g.image||'',opts:o};
   if(g.type=='fill'){const A=g.answers||{};let ai=0;g2.text=String(g.text||'').replace(/\[(\d*)\]/g,(_,d)=>{const m=d?+d:n;n=m+1;ak(m,Array.isArray(A)?A[ai++]:A[m]);return`[${m}]`})}
-  else{if(!['mcq','tfng','match','short'].includes(g.type))throw Error(w+': noma\'lum type "'+g.type+'"');g2.q=(g.questions||[]).map(q=>{const m=q.n||n;n=m+1;ak(m,q.answer);return{n:m,t:q.text||''}});if(g.type=='tfng')g2.opts=(yn?['YES','NO','NOT GIVEN']:['TRUE','FALSE','NOT GIVEN']).map(x=>({l:x,t:''}))}
+  else{if(!['mcq','tfng','match','short'].includes(g.type))throw Error(w+': noma\'lum type "'+g.type+'"');g2.q=(g.questions||[]).map(q=>{const m=q.n||n;n=m+1;ak(m,q.answer);return{n:m,t:q.text||'',o:(q.options||[]).map((x,i)=>typeof x=='string'?{l:LB(i),t:x}:{l:x.label,t:x.text})}});if(g.type=='tfng')g2.opts=(yn?['YES','NO','NOT GIVEN']:['TRUE','FALSE','NOT GIVEN']).map(x=>({l:x,t:''}))}
   return g2});ps.push({title:p.title||'Part '+(pi+1),intro:p.intro||'',passageTitle:p.passageTitle||'',passage:[].concat(p.passage||[]).join('\n\n'),groups:gs})});
  return{sec:{mockId:'',type:kind,v:2,minutes:Math.min(+j.minutes||60,60),parts:ps},map:k,total:Object.keys(k).length}}
 function qhtml(g){let h=`<div class=grp><h4>${X(g.title)}</h4><p class=ins>${fmt(g.ins)}</p>`;if(g.img&&/^(\/|https:)/.test(g.img))h+=`<img src="${X(g.img)}" style="max-width:100%">`;
  if(g.type=='fill')return h+`<div class=q>${fmt(g.text).replace(/\[(\d+)\]/g,(_,m)=>`<input type=text name=q${m} placeholder=${m} autocomplete=off spellcheck=false>`)}</div></div>`;
  if(g.type=='match')h+=`<div class=box>${g.opts.map(o=>`<div><b>${X(o.l)}</b> ${X(o.t)}</div>`).join('')}</div>`;
- return h+g.q.map(q=>`<div class=q><span class=qn>${q.n}</span> ${fmt(q.t)}${g.type=='short'?`<br><input type=text name=q${q.n} autocomplete=off spellcheck=false>`:g.type=='match'?` <select name=q${q.n}><option value="">—</option>${g.opts.map(o=>`<option>${X(o.l)}</option>`).join('')}</select>`:`<div class=opts>${g.opts.map(o=>`<label><input type=radio name=q${q.n} value="${X(o.l)}"> <b>${X(o.l)}</b> ${X(o.t)}</label>`).join('')}</div>`}</div>`).join('')+'</div>'}
+ return h+g.q.map(q=>`<div class=q><span class=qn>${q.n}</span> ${fmt(q.t)}${g.type=='short'?`<br><input type=text name=q${q.n} autocomplete=off spellcheck=false>`:g.type=='match'?` <select name=q${q.n}><option value="">—</option>${g.opts.map(o=>`<option>${X(o.l)}</option>`).join('')}</select>`:`<div class=opts>${(q.o&&q.o.length?q.o:g.opts).map(o=>`<label><input type=radio name=q${q.n} value="${X(o.l)}"> <b>${X(o.l)}</b> ${X(o.t)}</label>`).join('')}</div>`}</div>`).join('')+'</div>'}
  
  
 /* ---------- Kirish ---------- */
@@ -246,8 +246,8 @@ A.t_mk=async()=>{const ms=await col('mocks'),J=(id,l)=>`<h4>${l}</h4><textarea i
  ${J('rj','📖 Reading — JSON')}${J('wj','✍️ Writing — JSON')}<label>Writing Task 1 rasmi<input type=file id=wi accept="image/*"></label>
  <p id=up></p><button onclick="A.saveMock()">Saqlash</button></div>
  <div class=card><table>${ms.docs.map(d=>`<tr><td>${esc(d.data().title)}</td><td>${esc(d.data().date||'')}</td><td><button class=s onclick="A.delMock('${d.id}')">O'chirish</button></td></tr>`).join('')}</table></div>`)};
-const wnorm=txt=>{const j=JSON.parse(txt),T=Array.isArray(j.tasks)?j.tasks:[],g=x=>typeof x=='string'?x:x?[x.prompt||x.text||x.question,x.instruction].filter(Boolean).join('\n'):'';
- const w={kind:j.kind||'Academic',task1:j.task1||j.t1||g(T[0]),task2:j.task2||j.t2||g(T[1])};
+const wnorm=txt=>{const j=JSON.parse(txt),T=Array.isArray(j.tasks)?j.tasks:[],g=x=>typeof x=='string'?x:Array.isArray(x)?x.map(g).filter(Boolean).join('\n'):x&&typeof x=='object'?Object.entries(x).filter(([k])=>!/^(n|id|type|kind|minutes|words|minWords|image|img)$/i.test(k)).map(([k,v])=>g(v)).filter(Boolean).join('\n'):x!=null?String(x):'';
+ const w={kind:j.kind||'Academic',task1:g(j.task1||j.t1||T[0]),task2:g(j.task2||j.t2||T[1])};
  if(!String(w.task1).trim()||!String(w.task2).trim())throw Error('Writing JSON da \"task1\" va \"task2\" matni bo\'sh. Namuna tugmasidagi formatdan foydalaning.');return w};
 A.saveMock=async()=>{const f=id=>$('#'+id).files[0],v=id=>$('#'+id).value,up=$('#up');if(!v('mt'))return alert('Sarlavha kerak');
  let L,R,W;try{L=build('listening',v('lj'));R=build('reading',v('rj'));W=wnorm(v('wj'))}catch(e){return alert('JSON xato: '+e.message)}
