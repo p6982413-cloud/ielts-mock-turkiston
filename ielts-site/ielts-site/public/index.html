@@ -279,9 +279,9 @@ document.head.insertAdjacentHTML('beforeend','<style>'+
 '.pn:not(.all) tr.okr{display:none}.pn.hid{display:none}.lk{cursor:pointer;color:var(--b);font-weight:700}'+
 '#rep{display:none}'+
 '@media print{body>*:not(#rep){display:none!important}#rep{display:block!important;color:#000;background:#fff;font:13px/1.5 Arial,sans-serif}@page{margin:14mm}}'+
-'#rep h1{margin:0;font-size:22px}#rep h2{font-size:16px;margin:18px 0 6px;border-bottom:2px solid #888;padding-bottom:3px}#rep h3{font-size:14px;margin:12px 0 4px}'+
-'#rep table{width:100%;border-collapse:collapse;margin:6px 0}#rep th,#rep td{border:1px solid #999;padding:4px 8px;text-align:left;background:#fff;color:#000}#rep th{background:#eee}#rep tr{page-break-inside:avoid}'+
-'#rep .tx{white-space:pre-wrap;border:1px solid #bbb;padding:8px;margin:4px 0}#rep .hd{display:flex;align-items:center;gap:12px}#rep .hd img{width:54px;height:54px;border-radius:50%}'+
+'.rp h1{margin:0;font-size:22px}.rp h2{font-size:16px;margin:18px 0 6px;border-bottom:2px solid #888;padding-bottom:3px}.rp h3{font-size:14px;margin:12px 0 4px}'+
+'.rp table{width:100%;border-collapse:collapse;margin:6px 0}.rp th,.rp td{border:1px solid #999;padding:4px 8px;text-align:left;background:#fff;color:#000}.rp th{background:#eee}.rp tr{page-break-inside:avoid}'+
+'.rp .tx{white-space:pre-wrap;border:1px solid #bbb;padding:8px;margin:4px 0}.rp .hd{display:flex;align-items:center;gap:12px}.rp .hd img{width:54px;height:54px;border-radius:50%}'+
 '</style>');
 const dkey=t=>{if(!t?.toDate)return '';const d=t.toDate(),p=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())},
  fd=s=>s?String(s).split('-').reverse().join('.'):'—',CR=['Task Achievement/Response','Coherence & Cohesion','Lexical Resource','Grammatical Range & Accuracy'];
@@ -338,7 +338,7 @@ A.stu=async(mid,uid,tab)=>{if(RS.v!='s')RS.back=RS.v;RS.v='s';RS.sm=mid;RS.su=ui
   ${g.w+g.b==0?"<p class=ok><b>Xato yo'q 🎉</b></p>":''}<table><tr><th>#</th><th>Talaba javobi</th><th>To'g'ri javob</th><th></th></tr>${g.rows.map(x=>`<tr class="${x.ok?'okr':''}"><td>${x.n}</td><td>${esc(x.given||'—')}</td><td>${esc(x.key)}</td><td class="${x.ok?'ok':'no'}">${x.blank?'Javobsiz':x.ok?"To'g'ri":"Noto'g'ri"}</td></tr>`).join('')}</table>`},
  P={writing:wp,reading:rp('reading'),listening:rp('listening')},L={writing:'✍️ Writing',reading:'📖 Reading',listening:'🎧 Listening'},
  sm=SEC.map(t=>sb(at(t))),vals=sm.map(s=>s.band!=null?s.band+(s.auto?'*':''):s.st=='prog'?'Jarayonda':s.st=='wait'?'Baholanmagan':'—'),ob=ovl({S:{listening:at('listening'),reading:at('reading'),writing:at('writing')}});
- pg(`<div class=card><button class=s onclick="A.rb()">← Orqaga</button><h3 style="margin-top:10px">${esc(RD.N[uid]||'—')} · ${esc(M.title)}</h3><p class=mut>${esc(RD.G[uid]||'')}</p><div class=sg>${[['Listening',vals[0]],['Reading',vals[1]],['Writing',vals[2]],['Umumiy',ob??'—']].map(x=>`<div class=sc><small>${x[0]}</small><h2>${x[1]}</h2></div>`).join('')}</div><p style="margin-top:12px"><button onclick="A.pdf()">⬇ PDF yuklash (hammasi bitta faylda)</button></p></div>
+ pg(`<div class=card><button class=s onclick="A.rb()">← Orqaga</button><h3 style="margin-top:10px">${esc(RD.N[uid]||'—')} · ${esc(M.title)}</h3><p class=mut>${esc(RD.G[uid]||'')}</p><div class=sg>${[['Listening',vals[0]],['Reading',vals[1]],['Writing',vals[2]],['Umumiy',ob??'—']].map(x=>`<div class=sc><small>${x[0]}</small><h2>${x[1]}</h2></div>`).join('')}</div><p style="margin-top:12px"><button onclick="A.pdf(this)">⬇ PDF yuklash (hammasi bitta faylda)</button></p></div>
  <div class=card><div class=tabs>${['writing','reading','listening'].map(t=>`<a class="${t==RS.tab?'d':''}" onclick="A.pt('${t}')">${L[t]}</a>`).join('')}</div>${['writing','reading','listening'].map(t=>`<div class="pn ${t==RS.tab?'':'hid'}" id=pn_${t}>${P[t]}</div>`).join('')}</div>`)};
 A.saveR=async aid=>{const at=ATT[aid],g=grade(at),ov=$('#ov_'+aid).value;if(!g)return alert('Javob kaliti topilmadi');
  const o={uid:at.uid,sectionId:at.sectionId,mockId:at.mockId,type:at.type,correct:g.c,wrong:g.w,blank:g.b,total:g.tot,raw:g.c,band:ov!==''?+ov:g.bd,manual:ov!=='',t:serverTimestamp()};
@@ -348,16 +348,23 @@ A.saveW=async aid=>{const at=ATT[aid],c=[...document.querySelectorAll('.fc')].ma
  if(avg!=null){const o={uid:at.uid,sectionId:at.sectionId,mockId:at.mockId,type:'writing',band:avg,manual:true};await setDoc(doc(db,'results',aid),o);RES[aid]=o}
  log('Writing baholandi: '+aid);alert('Saqlandi'+(avg!=null?' · Writing band: '+avg:" · (band hisoblanishi uchun 4 ta mezonni ham to'ldiring)"));A.stu(RS.sm,RS.su)};
 /* ---- PDF: chop etish oynasi orqali ("PDF sifatida saqlash") ---- */
-A.pdf=()=>{const mid=RS.sm,uid=RS.su,M=RD.M[mid]||{},S=RS.S||{},nm=RD.N[uid]||'',at=t=>ATT[uid+'_'+mid+'_'+t];
+A.pdf=async btn=>{const mid=RS.sm,uid=RS.su,M=RD.M[mid]||{},S=RS.S||{},nm=RD.N[uid]||'',at=t=>ATT[uid+'_'+mid+'_'+t];
  const fc=[...document.querySelectorAll('.fc')].map(x=>x.value),cm=$('#fcm')?.value||'',wl=fc.length==4&&fc.every(x=>x!=='')?Math.round(fc.reduce((x,y)=>x+ +y,0)/4*2)/2:null;
  const sl=sb(at('listening')),sr=sb(at('reading')),sw=sb(at('writing')),wb=wl??sw.band,bs=[sl.band,sr.band,wb],ob=bs.every(x=>x!=null)?Math.round(bs.reduce((x,y)=>x+y)/3*2)/2:null;
  const gt=t=>{const a=at(t);if(!a)return "<p>Bu bo'lim ishlanmagan.</p>";if(a.status!=='submitted')return '<p>Topshirilmagan.</p>';const g=grade(a);if(!g)return '';const w=g.rows.filter(x=>!x.ok);
   return `<p>Jami: ${g.tot} · To'g'ri: ${g.c} · Noto'g'ri: ${g.w} · Javobsiz: ${g.b}</p>`+(w.length?`<table><tr><th>#</th><th>Sizning javobingiz</th><th>To'g'ri javob</th></tr>${w.map(x=>`<tr><td>${x.n}</td><td>${esc(x.given||'—')}</td><td>${esc(x.key)}</td></tr>`).join('')}</table>`:"<p>Xato yo'q 🎉</p>")};
  const wA=at('writing'),wa=wA?.answers||{},
- wt=!wA?"<p>Bu bo'lim ishlanmagan.</p>":[1,2].map(i=>`<h3>Task ${i} (${wc(wa['t'+i]||'')} so'z)</h3><div class=tx><b>Savol:</b>\n${esc(S['t'+i])}</div><div class=tx>${wa['t'+i]?esc(wa['t'+i]):'<i>Yozilmagan</i>'}</div>`).join('')+(fc.some(x=>x!=='')?`<table><tr>${CR.map(x=>`<th>${x}</th>`).join('')}</tr><tr>${fc.map(x=>`<td>${esc(x)||'—'}</td>`).join('')}</tr></table>`:'')+(cm?`<h3>O'qituvchi izohi</h3><div class=tx>${esc(cm)}</div>`:'');
+ wt=!wA?"<p>Bu bo'lim ishlanmagan.</p>":[1,2].map(i=>`<h3>Task ${i} (${wc(wa['t'+i]||'')} so'z)</h3><div class=tx><b>Savol:</b>\n${esc(S['t'+i])}${i==1&&/^data:image\//.test(S.img||'')?`<br><img src="${esc(S.img)}" style="max-width:100%;margin-top:6px">`:''}</div><div class=tx>${wa['t'+i]?esc(wa['t'+i]):'<i>Yozilmagan</i>'}</div>`).join('')+(fc.some(x=>x!=='')?`<table><tr>${CR.map(x=>`<th>${x}</th>`).join('')}</tr><tr>${fc.map(x=>`<td>${esc(x)||'—'}</td>`).join('')}</tr></table>`:'')+(cm?`<h3>O'qituvchi izohi</h3><div class=tx>${esc(cm)}</div>`:'');
  const H=`<div class=hd><img src="${LOGO}" alt=""><div><h1>TURKISTON LC</h1><div>IELTS Mock natijasi</div></div></div><h2>${esc(nm)}</h2><p>Guruh: ${esc(RD.G[uid]||'—')} · Mock: ${esc(M.title||'')}${M.date?' · '+fd(M.date):''}</p><table><tr><th>Listening</th><th>Reading</th><th>Writing</th><th>Umumiy</th></tr><tr><td>${sl.band??'—'}</td><td>${sr.band??'—'}</td><td>${wb??'—'}</td><td><b>${ob??'—'}</b></td></tr></table><h2>Writing</h2>${wt}<h2>Reading — xatolar</h2>${gt('reading')}<h2>Listening — xatolar</h2>${gt('listening')}`;
- const d=document.createElement('div');d.id='rep';d.innerHTML=H;document.body.append(d);const t0=document.title;document.title='Natija - '+nm+' - '+(M.title||'mock');
- const fin=()=>{d.remove();document.title=t0;removeEventListener('afterprint',fin)};addEventListener('afterprint',fin);setTimeout(()=>window.print(),100)};
+ const fn=('Natija - '+nm+' - '+(M.title||'mock')).replace(/[\\/:*?"<>|]+/g,' ').trim()+'.pdf',
+ pr=()=>{const d=document.createElement('div');d.id='rep';d.className='rp';d.innerHTML=H;document.body.append(d);const t0=document.title;document.title=fn.replace(/\.pdf$/,'');const fin=()=>{d.remove();document.title=t0;removeEventListener('afterprint',fin)};addEventListener('afterprint',fin);setTimeout(()=>window.print(),100)},
+ lb=()=>window.html2pdf?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';s.onload=ok;s.onerror=no;document.head.append(s)}),
+ t0=btn?.textContent;if(btn){btn.disabled=true;btn.textContent='PDF tayyorlanmoqda…'}
+ try{await lb();const el=document.createElement('div');el.className='rp';el.style.cssText='width:720px;background:#fff;color:#000;font:13px/1.5 Arial,sans-serif';el.innerHTML=H;
+  await Promise.all([...el.querySelectorAll('img')].map(i=>i.complete?0:new Promise(r=>{i.onload=i.onerror=r})));
+  await window.html2pdf().set({margin:[10,10,10,10],filename:fn,image:{type:'jpeg',quality:.95},html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff'},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},pagebreak:{mode:['css','legacy'],avoid:['tr','h2','h3']}}).from(el).save()}
+ catch(e){alert("PDF yaratib bo'lmadi ("+(e?.message||'internet yoki kutubxona xatosi')+"). Chop etish oynasi ochiladi — u yerda 'PDF sifatida saqlash' ni tanlang.");pr()}
+ finally{if(btn){btn.disabled=false;btn.textContent=t0}}};
 A.csv=()=>{const r=RS.cur||[],val=at=>{const s=sb(at);return s.band!=null?s.band:s.st=='prog'?'Jarayonda':s.st=='wait'?'Baholanmagan':''};
  const l=['Talaba,Guruh,Mock,Sana,Listening,Reading,Writing,Umumiy',...r.map(g=>[RD.N[g.uid],RD.G[g.uid],RD.M[g.mockId]?.title,fd(g.d),...SEC.map(t=>val(g.S[t])),ovl(g)??''].map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(','))].join('\n');
  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+l],{type:'text/csv'}));a.download='natijalar.csv';a.click()};
