@@ -23,6 +23,27 @@ mark{background:#fde047;cursor:pointer}.exam input[type=text],.exam select{width
 .opts label{display:flex;gap:8px;align-items:flex-start;padding:8px 12px;margin:4px 0;border:1px solid var(--ln);border-radius:10px;cursor:pointer}.opts label:hover{background:var(--l)}.opts input{width:auto;margin:3px 0}
 .box{background:var(--l);border-radius:10px;padding:10px 14px;margin:8px 0}.au{background:var(--l);border-radius:12px;padding:12px 16px;margin-bottom:12px}
 @media(max-width:800px){.split{flex-direction:column}header{padding:12px 16px}}
+
+:root{--n:#1b1033;--b:#6c3df4;--l:#f0ebff;--ln:#ece8f6}body{background:#f4f1fb}
+.shell{display:flex;min-height:100vh;padding:16px;gap:16px}
+.side{width:244px;flex:none;background:#fff;border-radius:22px;padding:20px 14px;display:flex;flex-direction:column;gap:4px;position:sticky;top:16px;height:calc(100vh - 32px);box-shadow:0 8px 30px #6c3df414}
+.side small{color:#94a3b8;font-weight:700;letter-spacing:.08em;margin:14px 10px 6px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;padding:4px 8px 12px}.logo i{font-style:normal;background:linear-gradient(135deg,#8b5cf6,#6c3df4);color:#fff;border-radius:12px;width:38px;height:38px;display:grid;place-items:center}
+.ni{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;cursor:pointer;font-weight:600;color:#334155}.ni span{width:32px;height:32px;border-radius:10px;background:#f4f1fb;display:grid;place-items:center}.ni:hover{background:#f7f4ff}.ni.on{background:var(--l);box-shadow:inset 0 0 0 1px #d9ccff;color:#4c1fd1}
+.me{margin-top:auto;display:flex;gap:10px;align-items:center;padding:10px;border:1px solid var(--ln);border-radius:14px}.me button{margin:0 0 0 auto;padding:6px 10px}
+.av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#a78bfa,#6c3df4);color:#fff;display:grid;place-items:center;font-weight:700;flex:none}
+main{flex:1;min-width:0;background:#fff;border-radius:22px;padding:26px;box-shadow:0 8px 30px #6c3df414}
+.top{margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid var(--ln)}.top h2{margin:0;font-size:24px}
+.g3{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin-bottom:18px}
+.st{position:relative;background:linear-gradient(160deg,#faf8ff,#fff);border:1px solid var(--ln);border-radius:18px;padding:18px;min-height:130px}.st h1{margin:4px 0;font-size:34px}.mut{color:#64748b;margin:6px 0 0}
+.ring{--p:0;position:absolute;right:18px;top:18px;width:84px;height:84px;border-radius:50%;background:conic-gradient(var(--b) calc(var(--p)*1%),#ece8fb 0);display:grid;place-items:center}.ring:before{content:'';position:absolute;inset:9px;background:#fff;border-radius:50%}.ring b{position:relative}
+.bars{display:flex;align-items:flex-end;gap:8px;height:56px;margin-top:8px}.bars i{flex:1;border-radius:99px;background:linear-gradient(#8b5cf6,#6c3df4)}
+.card{box-shadow:none;border-radius:18px}th{background:#faf8ff}.tag{background:var(--l);color:#5b32d6}
+.mk{display:grid;grid-template-columns:1.2fr repeat(3,1fr);gap:12px;align-items:center;padding:14px;border:1px solid var(--ln);border-radius:16px;margin-bottom:10px}.sec{display:flex;flex-direction:column;gap:6px;font-weight:600;text-transform:capitalize}
+.note{background:var(--l);padding:12px 16px;border-radius:12px;margin-bottom:16px;font-weight:600;color:#4c1fd1}
+.land{display:grid;grid-template-columns:1.1fr 1fr;min-height:100vh}.lh{background:linear-gradient(150deg,#4b21c4,#8b5cf6);color:#fff;padding:56px;display:flex;flex-direction:column;justify-content:center}.lh h1{font-size:40px;line-height:1.15}.lf{padding:40px;display:flex;flex-direction:column;justify-content:center;max-width:520px}
+.bar{background:linear-gradient(120deg,#1b1033,#5b32d6)}
+@media(max-width:900px){.shell{flex-direction:column;padding:10px}.side{width:auto;height:auto;position:static;flex-direction:row;flex-wrap:wrap;align-items:center}.side small{display:none}.me{margin:0 0 0 auto}.land{grid-template-columns:1fr}.lh{padding:32px}.mk{grid-template-columns:1fr 1fr}}
 </style></head><body><div id="app"></div>
 <script type="module">
 import {getAuth,signInWithEmailAndPassword,signOut,onAuthStateChanged,createUserWithEmailAndPassword,doc,getDoc,setDoc,updateDoc,deleteDoc,addDoc,collection,getDocs,query,where,serverTimestamp,getToken} from "./db.js";
@@ -50,7 +71,8 @@ function qhtml(g){let h=`<div class=grp><h4>${X(g.title)}</h4><p class=ins>${fmt
 
 
 /* ---------- Kirish ---------- */
-function landing(msg=''){app.innerHTML=`<header><b>IELTS MOCK EXAM</b></header><div class=wrap><div class="card hero"><h2>Computer-based IELTS mock imtihon platformasi</h2><p>Listening, Reading va Writing — haqiqiy kompyuter imtihoniga o'xshash muhitda.</p><p class=no>${msg}</p></div><div class=grid><div class=card><h3>Talaba kirishi</h3><input id=sl placeholder="Login kodi"><input id=sp type=password placeholder="Parol"><button onclick="A.login(0)">Kirish</button></div><div class=card><h3>Admin kirishi</h3><input id=ae placeholder="Admin email"><input id=ap type=password placeholder="Parol"><button onclick="A.login(1)">Kirish</button></div></div></div>`}
+function landing(msg=''){app.innerHTML=`<div class=land><section class=lh><div class=logo><i>◆</i> IELTS Mock</div><h1>Computer-based IELTS mock imtihon platformasi</h1><p>Listening, Reading va Writing — haqiqiy kompyuter imtihoniga o'xshash muhitda.</p></section><section class=lf><div class=card><h3>Talaba kirishi</h3><input id=sl placeholder="Login kodi"><input id=sp type=password placeholder="Parol"><button onclick="A.login(0)">Kirish</button></div><div class=card><h3>Admin kirishi</h3><input id=ae placeholder="Admin email"><input id=ap type=password placeholder="Parol"><button onclick="A.login(1)">Kirish</button></div><p class=no>${msg}</p></section></div>`}
+function shell(tabs,tab,act,ttl,sub,who){app.innerHTML=`<div class=shell><aside class=side><div class=logo><i>◆</i> IELTS Mock</div><small>MENU</small>${tabs.map(t=>`<a class="ni ${t[0]==tab?'on':''}" onclick="${act}('${t[0]}')"><span>${t[2]}</span>${t[1]}</a>`).join('')}<div class=me><div class=av>${esc((who||'?')[0])}</div><div><b>${esc(who)}</b><br><small style="margin:0">${esc(sub)}</small></div><button class=s onclick="A.out()" title="Chiqish">⏻</button></div></aside><main><div class=top><h2>${ttl}</h2><small>${new Date().toLocaleDateString('uz')}</small></div><div id=pg>Yuklanmoqda…</div></main></div>`}
 A.login=async adm=>{try{await signInWithEmailAndPassword(auth,adm?$('#ae').value.trim():$('#sl').value.trim().toLowerCase()+DOM,adm?$('#ap').value:$('#sp').value)}catch(e){landing("Login yoki parol noto'g'ri")}};
 A.out=()=>signOut(auth);
 let me={};
@@ -77,10 +99,10 @@ async function student(note=''){const uid=auth.currentUser.uid,q=n=>getDocs(quer
   if(a?.status==='submitted')return `<span class=tag>Topshirilgan</span> ${r?`${r.raw!=null?r.raw+'/'+r.total+' · ':''}Band ${r.band}`:''}`;
   if(a)return `<button onclick="A.open('${sid}')">Davom etish</button>`;
   return P[sid]?`<button onclick="A.start('${m.id}','${t}')">START</button>`:'<span class=tag>Kutilmoqda</span>'};
- app.innerHTML=`<header><b>IELTS MOCK EXAM</b><span>${esc(me.name)} · <span class=tag style="color:#000">Tizimda</span> <button class=s onclick="A.out()">Chiqish</button></span></header><div class=wrap>
- ${note?`<div class=card><b>${note}</b></div>`:''}${Object.values(P).some(Boolean)||Object.keys(T).length?'':'<div class=card>Admin tomonidan test ishlashga ruxsat berilishi kutilmoqda.</div>'}
- <div class=card><h3>Mavjud mock imtihonlar va tarix</h3><table><tr><th>Mock</th><th>Listening</th><th>Reading</th><th>Writing</th></tr>
- ${ms.docs.map(m=>`<tr><td>${esc(m.data().title)}<br><small>${esc(m.data().date||'')}</small></td>${SEC.map(t=>`<td>${cell(m,t)}</td>`).join('')}</tr>`).join('')}</table></div></div>`}
+ const done=Object.values(T).filter(x=>x.status==='submitted').length,bs=Object.values(R).map(r=>r.band).filter(b=>b!=null),avg=bs.length?(bs.reduce((x,y)=>x+y,0)/bs.length).toFixed(1):'—',av=Object.keys(P).filter(k=>P[k]&&!T[k]).length,IC={listening:'🎧',reading:'📖',writing:'✍️'};
+ shell([['h','Dashboard','⌂']],'h','void','Salom, '+esc(me.name)+' 👋',me.group||'Talaba',me.name);
+ $('#pg').innerHTML=`${note?`<div class=note>${note}</div>`:''}<div class=g3><div class=st><small>O'rtacha band</small><h1>${avg}</h1><p class=mut>${bs.length} ta natija</p><div class=ring style="--p:${avg=='—'?0:avg*100/9|0}"><b>${avg}</b></div></div><div class=st><small>Topshirilgan bo'limlar</small><h1>${done}</h1><p class=mut>jami ${ms.size*3} tadan</p></div><div class=st><small>Boshlashga tayyor</small><h1>${av}</h1><p class=mut>ruxsat berilgan bo'limlar</p></div></div>
+ <div class=card><h3>Mock imtihonlar</h3>${ms.docs.map(m=>`<div class=mk><div><b>${esc(m.data().title)}</b><br><small>${esc(m.data().date||'')}</small></div>${SEC.map(t=>`<div class=sec><span>${IC[t]} ${t}</span>${cell(m,t)}</div>`).join('')}</div>`).join('')||'<p class=mut>Hozircha mock yo\'q</p>'}</div>`}
 A.start=async(mid,t)=>{const uid=auth.currentUser.uid,sid=mid+'_'+t;
  try{await setDoc(doc(db,'attempts',uid+'_'+sid),{uid,sectionId:sid,mockId:mid,type:t,startedAt:serverTimestamp(),status:'in_progress',answers:{}})}
  catch(e){return alert("Boshlab bo'lmadi: ruxsat yo'q yoki bo'lim allaqachon boshlangan")}A.open(sid)};
@@ -135,11 +157,16 @@ A.open=async sid=>{const aid=auth.currentUser.uid+'_'+sid;
  const sv=setInterval(()=>{if(!done)updateDoc(doc(db,'attempts',aid),{answers:col2()}).then(()=>$('#sv').textContent='Saqlandi ✓').catch(()=>$('#sv').textContent='Saqlanmadi!')},10000)};
 
 /* ---------- Admin paneli ---------- */
-async function admin(tab){const tabs=[['stats','Statistika'],['st','Talabalar'],['mk','Mocklar'],['pm','Ruxsatlar'],['rs','Natijalar']];
- app.innerHTML=`<header><b>IELTS MOCK · Admin</b><span>${tabs.map(t=>`<button class="${t[0]==tab?'':'s'}" onclick="A.tab('${t[0]}')">${t[1]}</button>`).join(' ')} <button class=s onclick="A.out()">Chiqish</button></span></header><div class=wrap id=pg>Yuklanmoqda…</div>`;await A['t_'+tab]()}
+async function admin(tab){const tabs=[['stats','Dashboard','▦'],['st','Talabalar','👥'],['mk','Mocklar','📝'],['pm','Ruxsatlar','🔑'],['rs','Natijalar','📊']];
+ shell(tabs,tab,'A.tab','Salom, Admin 👋','Administrator','Admin');await A['t_'+tab]()}
 A.tab=admin;const pg=h=>$('#pg').innerHTML=h;
-A.t_stats=async()=>{const [s,m,a,l]=await Promise.all([col('students'),col('mocks'),col('attempts'),col('log')]);const at=a.docs.map(d=>d.data());
- pg(`<div class=grid>${[['Talabalar',s.size],['Mocklar',m.size],['Hozir imtihonda',at.filter(x=>x.status=='in_progress').length],['Yakunlangan',at.filter(x=>x.status=='submitted').length]].map(x=>`<div class=card><small>${x[0]}</small><h1>${x[1]}</h1></div>`).join('')}</div>
+A.t_stats=async()=>{const [s,m,a,l]=await Promise.all([col('students'),col('mocks'),col('attempts'),col('log')]),N={};s.forEach(d=>N[d.id]=d.data().name);
+ const at=a.docs.map(d=>d.data()),sub=at.filter(x=>x.status=='submitted'),ip=at.length-sub.length,pc=at.length?Math.round(sub.length*100/at.length):0,by=SEC.map(t=>at.filter(x=>x.type==t).length),mx=Math.max(1,...by),
+ rec=[...at].sort((x,y)=>(y.startedAt?.toMillis?.()||0)-(x.startedAt?.toMillis?.()||0)).slice(0,8);
+ pg(`<div class=g3><div class=st><small>Yakunlanish darajasi</small><h1>${sub.length}</h1><p class=mut>${at.length} ta urinishdan</p><div class=ring style="--p:${pc}"><b>${pc}%</b></div></div>
+ <div class=st><small>Talabalar · Mocklar</small><h1>${s.size} · ${m.size}</h1><div class=bars>${by.map(x=>`<i style="height:${8+x*48/mx}px"></i>`).join('')}</div><p class=mut>Listening · Reading · Writing</p></div>
+ <div class=st><small>Hozir imtihonda</small><h1>${ip}</h1><p class=mut>faol urinishlar</p></div></div>
+ <div class=card><h3>Oxirgi urinishlar</h3><table><tr><th>Talaba</th><th>Bo'lim</th><th>Holat</th><th>Boshlangan</th></tr>${rec.map(x=>`<tr><td><div style="display:flex;gap:10px;align-items:center"><div class=av>${esc((N[x.uid]||'?')[0])}</div>${esc(N[x.uid]||'—')}</div></td><td>${x.type}</td><td><span class=tag>${x.status=='submitted'?'Topshirgan':'Jarayonda'}</span></td><td>${ts(x.startedAt)}</td></tr>`).join('')}</table></div>
  <div class=card><h3>Faollik jurnali</h3><table>${l.docs.map(d=>d.data()).sort((a,b)=>(b.t?.seconds||0)-(a.t?.seconds||0)).slice(0,15).map(x=>`<tr><td>${ts(x.t)}</td><td>${esc(x.a)}</td></tr>`).join('')}</table></div>`)};
 let SD=[];
 A.t_st=async()=>{SD=(await col('students')).docs.map(d=>({id:d.id,...d.data()}));
