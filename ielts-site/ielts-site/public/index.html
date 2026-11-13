@@ -1,23 +1,31 @@
 <!doctype html><html lang="uz"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>IELTS Mock Exam</title>
 <style>
-:root{--n:#0b1f3a;--b:#2563eb;--l:#eef4ff}*{box-sizing:border-box}
-body{margin:0;font:15px system-ui,sans-serif;color:#0f172a;background:#f4f7fb}
-header{background:var(--n);color:#fff;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
-.wrap{max-width:1100px;margin:24px auto;padding:0 16px}.card{background:#fff;border-radius:14px;padding:20px;box-shadow:0 2px 12px #0b1f3a14;margin-bottom:16px;overflow:auto}
-.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
-input,select,textarea,button{font:inherit;padding:9px 12px;border-radius:9px;border:1px solid #cbd5e1;width:100%;margin:4px 0}
-button{width:auto;background:var(--b);color:#fff;border:0;cursor:pointer;transition:.2s}button.s{background:#e2e8f0;color:#0f172a}button:hover{filter:brightness(1.1)}
-table{width:100%;border-collapse:collapse}td,th{padding:8px;border-bottom:1px solid #e2e8f0;text-align:left;vertical-align:top}
-.tag{padding:2px 9px;border-radius:99px;background:var(--l);font-size:12px}.ok{color:#15803d}.no{color:#b91c1c}
+:root{--n:#0f1b3d;--b:#3b5bfd;--l:#eef1ff;--ln:#e6eaf2}*{box-sizing:border-box}
+body{margin:0;font:15px/1.55 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#0f172a;background:#f5f7fb;-webkit-font-smoothing:antialiased}
+header{position:sticky;top:0;z-index:5;background:linear-gradient(120deg,#0f1b3d,#243a9c);color:#fff;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;box-shadow:0 6px 24px #0f1b3d30}header b{letter-spacing:.08em}
+.wrap{max-width:1120px;margin:28px auto;padding:0 16px}
+.card{background:#fff;border:1px solid var(--ln);border-radius:16px;padding:22px;box-shadow:0 1px 2px #0f172a0d,0 12px 32px #0f172a0d;margin-bottom:18px;overflow:auto}
+.hero{background:linear-gradient(135deg,#eef1ff,#fff);padding:36px}.hero h2{font-size:28px;margin:0 0 8px;line-height:1.2}
+.grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}h3,h4{margin:.2em 0 .5em}
+input,select,textarea,button{font:inherit;padding:11px 14px;border-radius:10px;border:1px solid #d5dbe7;width:100%;margin:5px 0;background:#fff;color:inherit}
+input:focus,select:focus,textarea:focus{outline:3px solid #3b5bfd30;border-color:var(--b)}
+button{width:auto;background:var(--b);color:#fff;border:0;cursor:pointer;font-weight:600;transition:.15s}button.s{background:#eaeef6;color:#1e293b}header button.s{background:#ffffff26;color:#fff}button:hover{filter:brightness(1.08);transform:translateY(-1px)}
+table{width:100%;border-collapse:collapse}th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:#64748b}td,th{padding:12px 10px;border-bottom:1px solid var(--ln);text-align:left;vertical-align:top}tr:hover td{background:#f8faff}
+.tag{padding:3px 11px;border-radius:99px;background:var(--l);color:#2740c9;font-size:12px;font-weight:600}.ok{color:#15803d}.no{color:#b91c1c}
 .exam{position:fixed;inset:0;background:#fff;display:flex;flex-direction:column;z-index:9}
-.bar{background:var(--n);color:#fff;padding:10px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.bar button{margin:0}.bar b{margin-left:auto;font-size:20px}
-.split{flex:1;display:flex;overflow:hidden}.split>div{flex:1;overflow:auto;padding:18px}.split>div:first-child{border-right:2px solid #e2e8f0}
-.nav{padding:8px 12px;border-top:1px solid #e2e8f0;display:flex;gap:6px;flex-wrap:wrap}.nav a{padding:4px 10px;border-radius:99px;background:#e2e8f0;cursor:pointer}.nav a.d{background:var(--b);color:#fff}
-mark{background:#fde047;cursor:pointer}.exam input[type=text],.exam select{width:auto;display:inline-block;margin:2px}
-@media(max-width:800px){.split{flex-direction:column}}
+.bar{background:linear-gradient(120deg,#0f1b3d,#243a9c);color:#fff;padding:10px 18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.bar button{margin:0}.bar b{margin-left:auto;font-size:20px;font-variant-numeric:tabular-nums}
+#tm.low{color:#ff8a8a;animation:p 1s infinite}@keyframes p{50%{opacity:.4}}
+.split{flex:1;display:flex;overflow:hidden;background:#f5f7fb}.split>div{flex:1;overflow:auto;padding:22px;font-size:16px;line-height:1.7}.split>div:first-child{background:#fff;border-right:1px solid var(--ln)}
+.nav{padding:10px 14px;border-top:1px solid var(--ln);display:flex;gap:6px;flex-wrap:wrap;background:#fff}.nav a{padding:5px 12px;border-radius:99px;background:#eaeef6;cursor:pointer;font-weight:600;font-size:13px}.nav a.d{background:var(--b);color:#fff}
+mark{background:#fde047;cursor:pointer}.exam input[type=text],.exam select{width:auto;display:inline-block;margin:2px;padding:6px 10px}
+.grp{background:#fff;border:1px solid var(--ln);border-radius:14px;padding:16px;margin-bottom:16px}.ins{color:#475569;font-style:italic}.q{margin:12px 0}
+.qn{display:inline-block;min-width:26px;text-align:center;background:var(--n);color:#fff;border-radius:8px;font-weight:700;font-size:13px;padding:1px 6px;margin-right:6px}
+.opts label{display:flex;gap:8px;align-items:flex-start;padding:8px 12px;margin:4px 0;border:1px solid var(--ln);border-radius:10px;cursor:pointer}.opts label:hover{background:var(--l)}.opts input{width:auto;margin:3px 0}
+.box{background:var(--l);border-radius:10px;padding:10px 14px;margin:8px 0}.au{background:var(--l);border-radius:12px;padding:12px 16px;margin-bottom:12px}
+@media(max-width:800px){.split{flex-direction:column}header{padding:12px 16px}}
 </style></head><body><div id="app"></div>
 <script type="module">
-import {getAuth,signInWithEmailAndPassword,signOut,onAuthStateChanged,createUserWithEmailAndPassword,doc,getDoc,setDoc,updateDoc,deleteDoc,addDoc,collection,getDocs,query,where,serverTimestamp} from "./db.js";
+import {getAuth,signInWithEmailAndPassword,signOut,onAuthStateChanged,createUserWithEmailAndPassword,doc,getDoc,setDoc,updateDoc,deleteDoc,addDoc,collection,getDocs,query,where,serverTimestamp,getToken} from "./db.js";
 const $=s=>document.querySelector(s),app=$('#app'),DOM='@ielts-mock.uz',A=window.A={};
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const auth=getAuth(),db={},sa={};
@@ -25,9 +33,24 @@ const ts=t=>t?.toDate?t.toDate().toLocaleString('uz'):'-',norm=s=>String(s??'').
 const log=a=>addDoc(collection(db,'log'),{a,t:serverTimestamp()}).catch(()=>{});
 const col=n=>getDocs(collection(db,n)),wc=s=>(s.trim().match(/\S+/g)||[]).length;
 const SEC=['listening','reading','writing'];
+/* ---------- JSON test: tekshirish + chizish ---------- */
+const X=esc,fmt=s=>X(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>'),LB=i=>String.fromCharCode(65+i),TF={t:'TRUE',f:'FALSE',ng:'NOT GIVEN',y:'YES',n:'NO'};
+function build(kind,txt){const j=JSON.parse(txt),k={},ps=[];let n=1;if(!Array.isArray(j.parts)||!j.parts.length)throw Error('"parts" ro\'yxati kerak ('+kind+')');
+ j.parts.forEach((p,pi)=>{const gs=(p.groups||[]).map((g,gi)=>{const w=`${kind} parts[${pi}].groups[${gi}]`,yn=g.variant=='yn',o=(g.options||[]).map((x,i)=>typeof x=='string'?{l:LB(i),t:x}:{l:x.label,t:x.text});
+  const ak=(m,a)=>{if(a==null||a==='')throw Error(w+": "+m+"-savolda javob (answer) yo'q");k[m]=(Array.isArray(a)?a:String(a).split('/')).map(x=>{x=norm(x);return g.type=='tfng'?norm(TF[x.replace(/\s/g,'')]||x):x})};
+  const g2={type:g.type,title:g.title||'',ins:g.instructions||'',img:g.image||'',opts:o};
+  if(g.type=='fill'){const A=g.answers||{};let ai=0;g2.text=String(g.text||'').replace(/\[(\d*)\]/g,(_,d)=>{const m=d?+d:n;n=m+1;ak(m,Array.isArray(A)?A[ai++]:A[m]);return`[${m}]`})}
+  else{if(!['mcq','tfng','match','short'].includes(g.type))throw Error(w+': noma\'lum type "'+g.type+'"');g2.q=(g.questions||[]).map(q=>{const m=q.n||n;n=m+1;ak(m,q.answer);return{n:m,t:q.text||''}});if(g.type=='tfng')g2.opts=(yn?['YES','NO','NOT GIVEN']:['TRUE','FALSE','NOT GIVEN']).map(x=>({l:x,t:''}))}
+  return g2});ps.push({title:p.title||'Part '+(pi+1),intro:p.intro||'',passageTitle:p.passageTitle||'',passage:[].concat(p.passage||[]).join('\n\n'),groups:gs})});
+ return{sec:{mockId:'',type:kind,v:2,minutes:Math.min(+j.minutes||60,60),parts:ps},map:k,total:Object.keys(k).length}}
+function qhtml(g){let h=`<div class=grp><h4>${X(g.title)}</h4><p class=ins>${fmt(g.ins)}</p>`;if(g.img&&/^(\/|https:)/.test(g.img))h+=`<img src="${X(g.img)}" style="max-width:100%">`;
+ if(g.type=='fill')return h+`<div class=q>${fmt(g.text).replace(/\[(\d+)\]/g,(_,m)=>`<input type=text name=q${m} placeholder=${m} autocomplete=off spellcheck=false>`)}</div></div>`;
+ if(g.type=='match')h+=`<div class=box>${g.opts.map(o=>`<div><b>${X(o.l)}</b> ${X(o.t)}</div>`).join('')}</div>`;
+ return h+g.q.map(q=>`<div class=q><span class=qn>${q.n}</span> ${fmt(q.t)}${g.type=='short'?`<br><input type=text name=q${q.n} autocomplete=off spellcheck=false>`:g.type=='match'?` <select name=q${q.n}><option value="">—</option>${g.opts.map(o=>`<option>${X(o.l)}</option>`).join('')}</select>`:`<div class=opts>${g.opts.map(o=>`<label><input type=radio name=q${q.n} value="${X(o.l)}"> <b>${X(o.l)}</b> ${X(o.t)}</label>`).join('')}</div>`}</div>`).join('')+'</div>'}
+
 
 /* ---------- Kirish ---------- */
-function landing(msg=''){app.innerHTML=`<header><b>IELTS MOCK EXAM</b></header><div class=wrap><div class=card><h2>Computer-based IELTS mock imtihon platformasi</h2><p>Listening, Reading va Writing — haqiqiy kompyuter imtihoniga o'xshash muhitda.</p><p class=no>${msg}</p></div><div class=grid><div class=card><h3>Talaba kirishi</h3><input id=sl placeholder="Login kodi"><input id=sp type=password placeholder="Parol"><button onclick="A.login(0)">Kirish</button></div><div class=card><h3>Admin kirishi</h3><input id=ae placeholder="Admin email"><input id=ap type=password placeholder="Parol"><button onclick="A.login(1)">Kirish</button></div></div></div>`}
+function landing(msg=''){app.innerHTML=`<header><b>IELTS MOCK EXAM</b></header><div class=wrap><div class="card hero"><h2>Computer-based IELTS mock imtihon platformasi</h2><p>Listening, Reading va Writing — haqiqiy kompyuter imtihoniga o'xshash muhitda.</p><p class=no>${msg}</p></div><div class=grid><div class=card><h3>Talaba kirishi</h3><input id=sl placeholder="Login kodi"><input id=sp type=password placeholder="Parol"><button onclick="A.login(0)">Kirish</button></div><div class=card><h3>Admin kirishi</h3><input id=ae placeholder="Admin email"><input id=ap type=password placeholder="Parol"><button onclick="A.login(1)">Kirish</button></div></div></div>`}
 A.login=async adm=>{try{await signInWithEmailAndPassword(auth,adm?$('#ae').value.trim():$('#sl').value.trim().toLowerCase()+DOM,adm?$('#ap').value:$('#sp').value)}catch(e){landing("Login yoki parol noto'g'ri")}};
 A.out=()=>signOut(auth);
 let me={};
@@ -43,13 +66,13 @@ function clean(html){const d=new DOMParser().parseFromString(html||'','text/html
  d.querySelectorAll('*').forEach(e=>[...e.attributes].forEach(a=>{if(/^on/i.test(a.name)||/^\s*(javascript|data):/i.test(a.value)&&a.name!='src')e.removeAttribute(a.name)}));return d.body}
 function hl(el){el.addEventListener('mouseup',()=>{const s=getSelection();if(s.isCollapsed||!s.rangeCount)return;const r=s.getRangeAt(0);
  if(!el.contains(r.commonAncestorContainer)||r.commonAncestorContainer.nodeName=='TEXTAREA')return;
- try{const m=document.createElement('mark');r.surroundContents(m)}catch(e){}s.removeAllRanges()});
+ if(r.cloneContents().querySelector('input,select,textarea'))return;try{const m=document.createElement('mark');r.surroundContents(m)}catch(e){}s.removeAllRanges()});
  el.addEventListener('click',e=>{if(e.target.tagName=='MARK'){const m=e.target;m.replaceWith(...m.childNodes)}})}
 
 /* ---------- Talaba paneli ---------- */
 async function student(note=''){const uid=auth.currentUser.uid,q=n=>getDocs(query(collection(db,n),where('uid','==',uid)));
  const [ms,ps,as,rs]=await Promise.all([col('mocks'),q('permissions'),q('attempts'),q('results')]);
- const P={},T={},R={};ps.forEach(d=>P[d.data().sectionId||d.id]=d.data().granted);as.forEach(d=>T[d.data().sectionId||d.id]=d.data());rs.forEach(d=>R[d.data().sectionId||d.id]=d.data());
+ const P={},T={},R={};ps.forEach(d=>P[d.id]=d.data().granted);as.forEach(d=>T[d.id]=d.data());rs.forEach(d=>R[d.id]=d.data());
  const cell=(m,t)=>{const sid=m.id+'_'+t,a=T[sid],r=R[sid];
   if(a?.status==='submitted')return `<span class=tag>Topshirilgan</span> ${r?`${r.raw!=null?r.raw+'/'+r.total+' · ':''}Band ${r.band}`:''}`;
   if(a)return `<button onclick="A.open('${sid}')">Davom etish</button>`;
@@ -65,19 +88,27 @@ A.start=async(mid,t)=>{const uid=auth.currentUser.uid,sid=mid+'_'+t;
 A.open=async sid=>{const aid=auth.currentUser.uid+'_'+sid;
  const [as,ss]=await Promise.all([getDoc(doc(db,'attempts',aid)),getDoc(doc(db,'sections',sid))]);
  const at=as.data(),sc=ss.data();if(at.status!=='in_progress')return student();
- const start=at.startedAt.toMillis(),end=start+36e5,t=sc.type,ans=at.answers||{};let done=false,aud=null;
+ const start=at.startedAt.toMillis(),end=start+Math.min(sc.minutes||60,60)*6e4,t=sc.type,ans=at.answers||{};let done=false,aud=null;
  const ex=document.createElement('div');ex.className='exam';
  ex.innerHTML=`<div class=bar><b style="margin:0">${t.toUpperCase()}</b><button class=s id=fs>To'liq ekran</button><span id=sv></span><b id=tm></b><button id=sb>Topshirish</button></div><div class=split><div id=L></div><div id=R></div></div><div class=nav id=nv></div>`;
  document.body.append(ex);ex.requestFullscreen?.().catch(()=>{});$('#fs').onclick=()=>ex.requestFullscreen?.();
  const L=$('#L'),R=$('#R'),nv=$('#nv'),mount=(el,h)=>{el.append(...clean(h).childNodes);hl(el)};
  const restore=()=>ex.querySelectorAll('[name^=q]').forEach(e=>{const v=ans[e.name.slice(1)];if(v==null)return;e.type=='radio'?e.checked=e.value==v:e.type=='checkbox'?e.checked=String(v).split(',').includes(e.value):e.value=v});
- let col2=()=>({});
- if(t=='listening'){L.innerHTML=`<h3>Listening</h3><p>Audio avtomatik ijro etiladi. To'xtatish, oldinga/orqaga surish va tezlikni o'zgartirish mumkin emas.</p><div id=au></div>`;mount(R,sc.html);
+ let col2=()=>({}),go=()=>{};
+ if(sc.parts){const Lp=[],Rp=[];L.innerHTML=(t=='listening'?'<div class=au><b>🎧 Listening</b> <span id=au>Audio yuklanmoqda…</span></div>':'')+'<div class=nav id=pt style="border:0;padding:0 0 10px"></div>';R.innerHTML='';
+  sc.parts.forEach(p=>{const a=document.createElement('div'),b=document.createElement('div');a.innerHTML=`<h3>${X(p.title)}</h3><p>${fmt(p.intro)}</p>${p.passage?`<h3>${X(p.passageTitle)}</h3>${p.passage.split(/\n\n/).map(x=>`<p>${fmt(x)}</p>`).join('')}`:''}`;b.innerHTML=p.groups.map(qhtml).join('');hl(a);hl(b);L.append(a);R.append(b);Lp.push(a);Rp.push(b)});
+  const show=i=>{Lp.forEach((e,j)=>{e.hidden=Rp[j].hidden=j!=i});[...$('#pt').children].forEach((x,j)=>x.className=j==i?'d':'')};
+  $('#pt').innerHTML=sc.parts.map(p=>`<a>${X(p.title)}</a>`).join('');[...$('#pt').children].forEach((x,j)=>x.onclick=()=>show(j));go=el=>{const i=Rp.findIndex(r=>r.contains(el));i>=0&&show(i)};show(0);
+  if(t=='listening'){const src=typeof sc.audio=='string'?'/'+sc.audio.replace(/^\/+/,''):'/media/'+sc.audio.id+'?t='+encodeURIComponent(getToken()),au=$('#au'),exp=()=>(Date.now()-start)/1000;aud=new Audio(src);
+   aud.onloadedmetadata=()=>{aud.currentTime=Math.min(exp(),aud.duration);au.textContent='Audio ijro etilmoqda';aud.play().catch(()=>{au.innerHTML='<button>▶ Audioni yoqish</button>';au.onclick=()=>aud.play()})};
+   aud.onpause=()=>{if(!done&&!aud.ended)aud.play().catch(()=>{})};aud.onratechange=()=>aud.playbackRate=1;aud.onerror=()=>au.innerHTML='<span class=no>Audio topilmadi</span>';
+   const ai=setInterval(()=>{if(done)return clearInterval(ai);if(!aud.ended&&Math.abs(aud.currentTime-exp())>3)aud.currentTime=exp()},1000)}}
+ if(t=='listening'&&!sc.parts){L.innerHTML=`<h3>Listening</h3><p>Audio avtomatik ijro etiladi. To'xtatish, oldinga/orqaga surish va tezlikni o'zgartirish mumkin emas.</p><div id=au></div>`;mount(R,sc.html);
   Promise.resolve(sc.audio||Promise.reject()).then(url=>{aud=new Audio('/'+String(url).replace(/^\/+/,''));const exp=()=>(Date.now()-start)/1000;
    aud.onloadedmetadata=()=>{aud.currentTime=Math.min(exp(),aud.duration);aud.play().catch(()=>$('#au').innerHTML='<button id=pa>Audioni yoqish</button>',$('#au').onclick=()=>aud.play())};
    aud.onpause=()=>{if(!done&&!aud.ended)aud.play().catch(()=>{})};aud.onratechange=()=>aud.playbackRate=1;
    setInterval(()=>{if(!done&&!aud.ended&&Math.abs(aud.currentTime-exp())>3)aud.currentTime=exp()},1000)}).catch(()=>L.innerHTML+='<p class=no>Audio topilmadi</p>')}
- if(t=='reading'){const D=[1,2,3].map(i=>clean(sc['p'+i])),Lp=[],Rp=[];
+ if(t=='reading'&&!sc.parts){const D=[1,2,3].map(i=>clean(sc['p'+i])),Lp=[],Rp=[];
   L.innerHTML='<div class=nav id=pt style="border:0;padding:0 0 10px"></div>';R.innerHTML='';
   D.forEach((d,i)=>{const a=document.createElement('div'),b=document.createElement('div');a.append(d.querySelector('#passage')||d);const q=d.querySelector('#questions');if(q)b.append(q);hl(a);hl(b);L.append(a);R.append(b);Lp.push(a);Rp.push(b)});
   const show=i=>{Lp.forEach((e,j)=>{e.hidden=Rp[j].hidden=j!=i});[...$('#pt').children].forEach((x,j)=>x.className=j==i?'d':'')};
@@ -94,13 +125,13 @@ A.open=async sid=>{const aid=auth.currentUser.uid+'_'+sid;
   col2=()=>{const o={};ex.querySelectorAll('[name^=q]').forEach(e=>{const n=e.name.slice(1);if(!/^\d+$/.test(n))return;
    if(e.type=='radio'){if(e.checked)o[n]=e.value}else if(e.type=='checkbox'){if(e.checked)o[n]=(o[n]?o[n]+',':'')+e.value}else if(e.value)o[n]=e.value});return o};
   const paint=()=>{const a=col2();nv.innerHTML=names.map(n=>`<a class="${a[n.slice(1)]?'d':''}" data-n="${n}">${n.slice(1)}</a>`).join('')};
-  nv.onclick=e=>{const n=e.target.dataset?.n;if(n)ex.querySelector(`[name=${n}]`)?.scrollIntoView({block:'center'})};ex.addEventListener('input',paint);paint()}
+  nv.onclick=e=>{const n=e.target.dataset?.n;if(n){const el=ex.querySelector(`[name=${n}]`);go(el);el?.scrollIntoView({block:'center'})}};ex.addEventListener('input',paint);paint()}
  const submit=async auto=>{if(done)return;if(!auto&&!confirm('Topshirishni tasdiqlaysizmi? Keyin o\'zgartirib bo\'lmaydi.'))return;
   done=true;clearInterval(tm);clearInterval(sv);aud?.pause();
   try{await updateDoc(doc(db,'attempts',aid),{answers:col2(),status:'submitted',submittedAt:serverTimestamp()})}catch(e){alert('Saqlashda xato: '+e.message)}
   ex.remove();document.exitFullscreen?.().catch(()=>{});student("Bo'lim topshirildi. Keyingi bo'lim uchun admin ruxsatini kuting.")};
  $('#sb').onclick=()=>submit(false);
- const tm=setInterval(()=>{const r=Math.max(0,end-Date.now());$('#tm').textContent=String(Math.floor(r/6e4)).padStart(2,'0')+':'+String(Math.floor(r/1e3)%60).padStart(2,'0');if(r<=0)submit(true)},1000);
+ const tm=setInterval(()=>{const r=Math.max(0,end-Date.now());$('#tm').className=r<3e5?'low':'';$('#tm').textContent=String(Math.floor(r/6e4)).padStart(2,'0')+':'+String(Math.floor(r/1e3)%60).padStart(2,'0');if(r<=0)submit(true)},1000);
  const sv=setInterval(()=>{if(!done)updateDoc(doc(db,'attempts',aid),{answers:col2()}).then(()=>$('#sv').textContent='Saqlandi ✓').catch(()=>$('#sv').textContent='Saqlanmadi!')},10000)};
 
 /* ---------- Admin paneli ---------- */
@@ -124,21 +155,27 @@ A.ed=async id=>{const s=SD.find(x=>x.id==id),n=prompt('Ism',s.name);if(n==null)r
 A.del=async id=>{if(confirm("O'chirilsinmi?")){await deleteDoc(doc(db,'students',id));log("Talaba o'chirildi");A.t_st()}};
 
 const keys=t=>{const m={};t.split('\n').forEach(l=>{const x=l.match(/^\s*(\d+)\s*[=:.)\-\s]\s*(.+)$/);if(x)m[x[1]]=x[2].split('/').map(norm).filter(Boolean)});return m};
-A.t_mk=async()=>{const ms=await col('mocks'),f=(id,l,a='')=>`<label>${l}<input type=file id=${id} accept="${a}"></label>`;
+A.loadJ=(el,id)=>el.files[0]?.text().then(t=>$('#'+id).value=t);
+A.smp=async id=>{$('#'+id).value=await(await fetch('/samples/'+{lj:'listening',rj:'reading',wj:'writing'}[id]+'.json')).text()};
+A.t_mk=async()=>{const ms=await col('mocks'),J=(id,l)=>`<h4>${l}</h4><textarea id=${id} rows=6 placeholder="JSON kodni shu yerga qo'ying" style="font-family:monospace"></textarea><input type=file accept=".json,application/json" onchange="A.loadJ(this,'${id}')"> <button class=s onclick="A.smp('${id}')">Namuna</button>`;
  pg(`<div class=card><h3>Yangi mock</h3><div class=grid><input id=mt placeholder="Sarlavha"><input id=mn placeholder="Raqam"><input id=md type=date><input id=mdesc placeholder="Tavsif"></div>
- <h4>Listening</h4>${f('lh','HTML test','.html')}<input id=la placeholder="Audio fayl yo'li, masalan: audio/mock1.mp3"><textarea id=lk rows=4 placeholder="Javob kaliti: 1=B  2=cat/cats"></textarea>
- <h4>Reading</h4>${f('r1','Passage 1 HTML','.html')}${f('r2','Passage 2 HTML','.html')}${f('r3','Passage 3 HTML','.html')}<textarea id=rk rows=4 placeholder="1=iii  14=TRUE ..."></textarea>
- <h4>Writing</h4><select id=wk><option>Academic</option><option>General Training</option></select>${f('wi','Task 1 rasm','image/*')}<textarea id=w1 rows=3 placeholder="Task 1 ko'rsatma"></textarea><textarea id=w2 rows=3 placeholder="Task 2 esse savoli"></textarea>
- <button onclick="A.saveMock()">Saqlash</button></div>
+ ${J('lj','🎧 Listening (40 savol) — JSON')}<label>Audio fayl (mp3) — kompyuterdan tanlang<input type=file id=la accept="audio/*"></label>
+ ${J('rj','📖 Reading — JSON')}${J('wj','✍️ Writing — JSON')}<label>Writing Task 1 rasmi<input type=file id=wi accept="image/*"></label>
+ <p id=up></p><button onclick="A.saveMock()">Saqlash</button></div>
  <div class=card><table>${ms.docs.map(d=>`<tr><td>${esc(d.data().title)}</td><td>${esc(d.data().date||'')}</td><td><button class=s onclick="A.delMock('${d.id}')">O'chirish</button></td></tr>`).join('')}</table></div>`)};
-A.saveMock=async()=>{const f=id=>$('#'+id).files[0],v=id=>$('#'+id).value,tx=x=>x?x.text():'';if(!v('mt'))return alert('Sarlavha kerak');
- const m=await addDoc(collection(db,'mocks'),{title:v('mt'),number:v('mn'),date:v('md'),desc:v('mdesc'),createdAt:serverTimestamp()}),id=m.id;
- const [L,R,W]=SEC.map(s=>id+'_'+s);
- try{await setDoc(doc(db,'sections',L),{mockId:id,type:'listening',html:await tx(f('lh')),audio:v('la').trim()});await setDoc(doc(db,'keys',L),{map:keys(v('lk'))});
-  await setDoc(doc(db,'sections',R),{mockId:id,type:'reading',p1:await tx(f('r1')),p2:await tx(f('r2')),p3:await tx(f('r3'))});await setDoc(doc(db,'keys',R),{map:keys(v('rk'))});
-  await setDoc(doc(db,'sections',W),{mockId:id,type:'writing',kind:v('wk'),t1:v('w1'),t2:v('w2'),img:f('wi')?await new Promise(r=>{const x=new FileReader();x.onload=()=>r(x.result);x.readAsDataURL(f('wi'))}):''});
-  log('Mock yaratildi: '+v('mt'));A.t_mk()}catch(e){alert('Xato: '+e.message)}};
-A.delMock=async id=>{if(!confirm("O'chirilsinmi?"))return;for(const s of SEC){await deleteDoc(doc(db,'sections',id+'_'+s));await deleteDoc(doc(db,'keys',id+'_'+s))}await deleteDoc(doc(db,'mocks',id));log("Mock o'chirildi");A.t_mk()};
+A.saveMock=async()=>{const f=id=>$('#'+id).files[0],v=id=>$('#'+id).value,up=$('#up');if(!v('mt'))return alert('Sarlavha kerak');
+ let L,R,W;try{L=build('listening',v('lj'));R=build('reading',v('rj'));W=JSON.parse(v('wj'))}catch(e){return alert('JSON xato: '+e.message)}
+ if(!f('la'))return alert('Listening audio faylini tanlang');
+ try{const aid=crypto.randomUUID(),F=f('la'),C=3<<20,n=Math.ceil(F.size/C),H={authorization:'Bearer '+getToken()};
+  for(let i=0;i<n;i++){up.textContent=`Audio yuklanmoqda… ${i+1}/${n}`;const r=await fetch(`/media/${aid}?i=${i}`,{method:'POST',headers:H,body:F.slice(i*C,(i+1)*C)});if(!r.ok)throw Error('Audio yuklanmadi ('+r.status+')')}
+  if(!(await fetch(`/media/${aid}?done=1&chunks=${n}&size=${F.size}&type=${encodeURIComponent(F.type||'audio/mpeg')}`,{method:'POST',headers:H})).ok)throw Error('Audio yakunlanmadi');
+  const id=(await addDoc(collection(db,'mocks'),{title:v('mt'),number:v('mn'),date:v('md'),desc:v('mdesc'),createdAt:serverTimestamp()})).id,[Ls,Rs,Ws]=SEC.map(s=>id+'_'+s);
+  L.sec.mockId=R.sec.mockId=id;L.sec.audio={id:aid,name:F.name,size:F.size};
+  await setDoc(doc(db,'sections',Ls),L.sec);await setDoc(doc(db,'keys',Ls),{map:L.map});await setDoc(doc(db,'sections',Rs),R.sec);await setDoc(doc(db,'keys',Rs),{map:R.map});
+  const img=f('wi')?await new Promise(r=>{const x=new FileReader();x.onload=()=>r(x.result);x.readAsDataURL(f('wi'))}):'';
+  await setDoc(doc(db,'sections',Ws),{mockId:id,type:'writing',kind:W.kind||'Academic',t1:W.task1||W.t1||'',t2:W.task2||W.t2||'',img});
+  log('Mock yaratildi: '+v('mt'));alert(`Saqlandi: Listening ${L.total} ta, Reading ${R.total} ta savol`);A.t_mk()}catch(e){up.textContent='';alert('Xato: '+e.message)}};
+A.delMock=async id=>{if(!confirm("O'chirilsinmi?"))return;const ls=(await getDoc(doc(db,'sections',id+'_listening'))).data();if(ls?.audio?.id)fetch('/media/'+ls.audio.id,{method:'DELETE',headers:{authorization:'Bearer '+getToken()}});for(const s of SEC){await deleteDoc(doc(db,'sections',id+'_'+s));await deleteDoc(doc(db,'keys',id+'_'+s))}await deleteDoc(doc(db,'mocks',id));log("Mock o'chirildi");A.t_mk()};
 
 let SM='';
 A.t_pm=async()=>{const [ms,ss,ps,as]=await Promise.all([col('mocks'),col('students'),col('permissions'),col('attempts')]);SM=SM||ms.docs[0]?.id||'';

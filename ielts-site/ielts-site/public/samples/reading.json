@@ -1,0 +1,283 @@
+{
+ "minutes": 60,
+ "parts": [
+  {
+   "title": "Passage 1",
+   "passageTitle": "Matn 1 (namuna)",
+   "passage": [
+    "**A** Birinchi paragraf (namuna).",
+    "**B** Ikkinchi paragraf (namuna)."
+   ],
+   "groups": [
+    {
+     "type": "tfng",
+     "variant": "tf",
+     "title": "Questions 1–7",
+     "instructions": "Do the statements agree with the passage?",
+     "questions": [
+      {
+       "text": "Gap (namuna) 1",
+       "answer": "TRUE"
+      },
+      {
+       "text": "Gap (namuna) 2",
+       "answer": "FALSE"
+      },
+      {
+       "text": "Gap (namuna) 3",
+       "answer": "NOT GIVEN"
+      },
+      {
+       "text": "Gap (namuna) 4",
+       "answer": "TRUE"
+      },
+      {
+       "text": "Gap (namuna) 5",
+       "answer": "FALSE"
+      },
+      {
+       "text": "Gap (namuna) 6",
+       "answer": "NOT GIVEN"
+      },
+      {
+       "text": "Gap (namuna) 7",
+       "answer": "TRUE"
+      }
+     ]
+    },
+    {
+     "type": "fill",
+     "title": "Questions 8–13",
+     "instructions": "Complete the notes. Write ONE WORD AND/OR A NUMBER.",
+     "text": "Ma'lumot 1: []\nMa'lumot 2: []\nMa'lumot 3: []\nMa'lumot 4: []\nMa'lumot 5: []\nMa'lumot 6: []",
+     "answers": [
+      "javob8",
+      "javob9",
+      "javob10",
+      "javob11",
+      "javob12",
+      "javob13"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Passage 2",
+   "passageTitle": "Matn 2 (namuna)",
+   "passage": [
+    "**A** Birinchi paragraf (namuna).",
+    "**B** Ikkinchi paragraf (namuna)."
+   ],
+   "groups": [
+    {
+     "type": "match",
+     "title": "Questions 14–19",
+     "instructions": "Choose the correct option from the list.",
+     "options": [
+      {
+       "label": "i",
+       "text": "Variant i"
+      },
+      {
+       "label": "ii",
+       "text": "Variant ii"
+      },
+      {
+       "label": "iii",
+       "text": "Variant iii"
+      },
+      {
+       "label": "iv",
+       "text": "Variant iv"
+      },
+      {
+       "label": "v",
+       "text": "Variant v"
+      },
+      {
+       "label": "vi",
+       "text": "Variant vi"
+      }
+     ],
+     "questions": [
+      {
+       "text": "Element (namuna) 14",
+       "answer": "i"
+      },
+      {
+       "text": "Element (namuna) 15",
+       "answer": "ii"
+      },
+      {
+       "text": "Element (namuna) 16",
+       "answer": "iii"
+      },
+      {
+       "text": "Element (namuna) 17",
+       "answer": "iv"
+      },
+      {
+       "text": "Element (namuna) 18",
+       "answer": "v"
+      },
+      {
+       "text": "Element (namuna) 19",
+       "answer": "vi"
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "title": "Questions 20–26",
+     "instructions": "Choose the correct letter, A, B or C.",
+     "questions": [
+      {
+       "text": "Savol matni (namuna) 20",
+       "options": [
+        "Variant A",
+        "Variant B",
+        "Variant C"
+       ],
+       "answer": "A"
+      },
+      {
+       "text": "Savol matni (namuna) 21",
+       "options": [
+        "Variant A",
+        "Variant B",
+        "Variant C"
+       ],
+       "answer": "A"
+      },
+      {
+       "text": "Savol matni (namuna) 22",
+       "options": [
+        "Variant A",
+        "Variant B",
+        "Variant C"
+       ],
+       "answer": "A"
+      },
+      {
+       "text": "Savol matni (namuna) 23",
+       "options": [
+        "Variant A",
+        "Variant B",
+        "Variant C"
+       ],
+       "answer": "A"
+      },
+      {
+       "text": "Savol matni (namuna) 24",
+       "options": [
+        "Variant A",
+        "Variant B",
+        "Variant C"
+       ],
+       "answer": "A"
+      },
+      {
+       "text": "Savol matni (namuna) 25",
+       "options": [
+        "Variant A",
+        "Variant B",
+        "Variant C"
+       ],
+       "answer": "A"
+      },
+      {
+       "text": "Savol matni (namuna) 26",
+       "options": [
+        "Variant A",
+        "Variant B",
+        "Variant C"
+       ],
+       "answer": "A"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Passage 3",
+   "passageTitle": "Matn 3 (namuna)",
+   "passage": [
+    "**A** Birinchi paragraf (namuna).",
+    "**B** Ikkinchi paragraf (namuna)."
+   ],
+   "groups": [
+    {
+     "type": "tfng",
+     "variant": "yn",
+     "title": "Questions 27–33",
+     "instructions": "Do the statements agree with the passage?",
+     "questions": [
+      {
+       "text": "Gap (namuna) 27",
+       "answer": "YES"
+      },
+      {
+       "text": "Gap (namuna) 28",
+       "answer": "NO"
+      },
+      {
+       "text": "Gap (namuna) 29",
+       "answer": "NOT GIVEN"
+      },
+      {
+       "text": "Gap (namuna) 30",
+       "answer": "YES"
+      },
+      {
+       "text": "Gap (namuna) 31",
+       "answer": "NO"
+      },
+      {
+       "text": "Gap (namuna) 32",
+       "answer": "NOT GIVEN"
+      },
+      {
+       "text": "Gap (namuna) 33",
+       "answer": "YES"
+      }
+     ]
+    },
+    {
+     "type": "short",
+     "title": "Questions 34–40",
+     "instructions": "Answer the questions. Write NO MORE THAN TWO WORDS.",
+     "questions": [
+      {
+       "text": "Savol (namuna) 34?",
+       "answer": "word/words"
+      },
+      {
+       "text": "Savol (namuna) 35?",
+       "answer": "word/words"
+      },
+      {
+       "text": "Savol (namuna) 36?",
+       "answer": "word/words"
+      },
+      {
+       "text": "Savol (namuna) 37?",
+       "answer": "word/words"
+      },
+      {
+       "text": "Savol (namuna) 38?",
+       "answer": "word/words"
+      },
+      {
+       "text": "Savol (namuna) 39?",
+       "answer": "word/words"
+      },
+      {
+       "text": "Savol (namuna) 40?",
+       "answer": "word/words"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

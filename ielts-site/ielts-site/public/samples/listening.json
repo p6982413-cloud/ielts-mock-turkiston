@@ -1,0 +1,246 @@
+{
+ "minutes": 60,
+ "parts": [
+  {
+   "title": "Part 1",
+   "intro": "NAMUNA. Suhbatni tinglang.",
+   "groups": [
+    {
+     "type": "fill",
+     "title": "Questions 1–10",
+     "instructions": "Complete the notes. Write ONE WORD AND/OR A NUMBER.",
+     "text": "Ma'lumot 1: []\nMa'lumot 2: []\nMa'lumot 3: []\nMa'lumot 4: []\nMa'lumot 5: []\nMa'lumot 6: []\nMa'lumot 7: []\nMa'lumot 8: []\nMa'lumot 9: []\nMa'lumot 10: []",
+     "answers": [
+      "javob1",
+      "javob2",
+      "javob3",
+      "javob4",
+      "javob5",
+      "javob6",
+      "javob7",
+      "javob8",
+      "javob9",
+      "javob10"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Part 2",
+   "groups": [
+    {
+     "type": "mcq",
+     "title": "Questions 11–15",
+     "instructions": "Choose the correct letter, A, B or C.",
+     "questions": [
+      {
+       "text": "Savol matni (namuna) 11",
+       "options": [
+        "Variant A",
+        "Variant B",
+        "Variant C"
+       ],
+       "answer": "B"
+      },
+      {
+       "text": "Savol matni (namuna) 12",
+       "options": [
+        "Variant A",
+        "Variant B",
+        "Variant C"
+       ],
+       "answer": "B"
+      },
+      {
+       "text": "Savol matni (namuna) 13",
+       "options": [
+        "Variant A",
+        "Variant B",
+        "Variant C"
+       ],
+       "answer": "B"
+      },
+      {
+       "text": "Savol matni (namuna) 14",
+       "options": [
+        "Variant A",
+        "Variant B",
+        "Variant C"
+       ],
+       "answer": "B"
+      },
+      {
+       "text": "Savol matni (namuna) 15",
+       "options": [
+        "Variant A",
+        "Variant B",
+        "Variant C"
+       ],
+       "answer": "B"
+      }
+     ]
+    },
+    {
+     "type": "match",
+     "title": "Questions 16–20",
+     "instructions": "Choose the correct option from the list.",
+     "options": [
+      {
+       "label": "A",
+       "text": "Variant A"
+      },
+      {
+       "label": "B",
+       "text": "Variant B"
+      },
+      {
+       "label": "C",
+       "text": "Variant C"
+      },
+      {
+       "label": "D",
+       "text": "Variant D"
+      },
+      {
+       "label": "E",
+       "text": "Variant E"
+      },
+      {
+       "label": "F",
+       "text": "Variant F"
+      }
+     ],
+     "questions": [
+      {
+       "text": "Element (namuna) 16",
+       "answer": "A"
+      },
+      {
+       "text": "Element (namuna) 17",
+       "answer": "B"
+      },
+      {
+       "text": "Element (namuna) 18",
+       "answer": "C"
+      },
+      {
+       "text": "Element (namuna) 19",
+       "answer": "D"
+      },
+      {
+       "text": "Element (namuna) 20",
+       "answer": "E"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Part 3",
+   "groups": [
+    {
+     "type": "mcq",
+     "title": "Questions 21–25",
+     "instructions": "Choose the correct letter, A, B or C.",
+     "questions": [
+      {
+       "text": "Savol matni (namuna) 21",
+       "options": [
+        "Variant A",
+        "Variant B",
+        "Variant C"
+       ],
+       "answer": "C"
+      },
+      {
+       "text": "Savol matni (namuna) 22",
+       "options": [
+        "Variant A",
+        "Variant B",
+        "Variant C"
+       ],
+       "answer": "C"
+      },
+      {
+       "text": "Savol matni (namuna) 23",
+       "options": [
+        "Variant A",
+        "Variant B",
+        "Variant C"
+       ],
+       "answer": "C"
+      },
+      {
+       "text": "Savol matni (namuna) 24",
+       "options": [
+        "Variant A",
+        "Variant B",
+        "Variant C"
+       ],
+       "answer": "C"
+      },
+      {
+       "text": "Savol matni (namuna) 25",
+       "options": [
+        "Variant A",
+        "Variant B",
+        "Variant C"
+       ],
+       "answer": "C"
+      }
+     ]
+    },
+    {
+     "type": "short",
+     "title": "Questions 26–30",
+     "instructions": "Answer the questions. Write NO MORE THAN TWO WORDS.",
+     "questions": [
+      {
+       "text": "Savol (namuna) 26?",
+       "answer": "word/words"
+      },
+      {
+       "text": "Savol (namuna) 27?",
+       "answer": "word/words"
+      },
+      {
+       "text": "Savol (namuna) 28?",
+       "answer": "word/words"
+      },
+      {
+       "text": "Savol (namuna) 29?",
+       "answer": "word/words"
+      },
+      {
+       "text": "Savol (namuna) 30?",
+       "answer": "word/words"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Part 4",
+   "groups": [
+    {
+     "type": "fill",
+     "title": "Questions 31–40",
+     "instructions": "Complete the notes. Write ONE WORD AND/OR A NUMBER.",
+     "text": "Ma'lumot 1: []\nMa'lumot 2: []\nMa'lumot 3: []\nMa'lumot 4: []\nMa'lumot 5: []\nMa'lumot 6: []\nMa'lumot 7: []\nMa'lumot 8: []\nMa'lumot 9: []\nMa'lumot 10: []",
+     "answers": [
+      "javob31",
+      "javob32",
+      "javob33",
+      "javob34",
+      "javob35",
+      "javob36",
+      "javob37",
+      "javob38",
+      "javob39",
+      "javob40"
+     ]
+    }
+   ]
+  }
+ ]
+}

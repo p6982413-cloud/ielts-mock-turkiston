@@ -27,3 +27,4 @@ export const signInWithEmailAndPassword=async(_,email,password)=>{const j=await 
 export const signOut=async a=>{if(a===auth){out();fire()}};
 export const createUserWithEmailAndPassword=async(_,email,password)=>({user:{uid:(await api('mkuser',{email,password})).uid}});
 export const onAuthStateChanged=(a,f)=>{subs.push(f);setTimeout(()=>f(auth.currentUser))};
+export const getToken=()=>tok;
