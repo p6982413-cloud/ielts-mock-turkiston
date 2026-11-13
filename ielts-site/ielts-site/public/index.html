@@ -23,7 +23,7 @@ mark{background:#fde047;cursor:pointer}.exam input[type=text],.exam select{width
 .opts label{display:flex;gap:8px;align-items:flex-start;padding:8px 12px;margin:4px 0;border:1px solid var(--ln);border-radius:10px;cursor:pointer}.opts label:hover{background:var(--l)}.opts input{width:auto;margin:3px 0}
 .box{background:var(--l);border-radius:10px;padding:10px 14px;margin:8px 0}.au{background:var(--l);border-radius:12px;padding:12px 16px;margin-bottom:12px}
 @media(max-width:800px){.split{flex-direction:column}header{padding:12px 16px}}
-
+ 
 :root{--n:#1b1033;--b:#6c3df4;--l:#f0ebff;--ln:#ece8f6}body{background:#f4f1fb}
 .shell{display:flex;min-height:100vh;padding:16px;gap:16px}
 .side{width:244px;flex:none;background:#fff;border-radius:22px;padding:20px 14px;display:flex;flex-direction:column;gap:4px;position:sticky;top:16px;height:calc(100vh - 32px);box-shadow:0 8px 30px #6c3df414}
@@ -68,8 +68,8 @@ function qhtml(g){let h=`<div class=grp><h4>${X(g.title)}</h4><p class=ins>${fmt
  if(g.type=='fill')return h+`<div class=q>${fmt(g.text).replace(/\[(\d+)\]/g,(_,m)=>`<input type=text name=q${m} placeholder=${m} autocomplete=off spellcheck=false>`)}</div></div>`;
  if(g.type=='match')h+=`<div class=box>${g.opts.map(o=>`<div><b>${X(o.l)}</b> ${X(o.t)}</div>`).join('')}</div>`;
  return h+g.q.map(q=>`<div class=q><span class=qn>${q.n}</span> ${fmt(q.t)}${g.type=='short'?`<br><input type=text name=q${q.n} autocomplete=off spellcheck=false>`:g.type=='match'?` <select name=q${q.n}><option value="">—</option>${g.opts.map(o=>`<option>${X(o.l)}</option>`).join('')}</select>`:`<div class=opts>${g.opts.map(o=>`<label><input type=radio name=q${q.n} value="${X(o.l)}"> <b>${X(o.l)}</b> ${X(o.t)}</label>`).join('')}</div>`}</div>`).join('')+'</div>'}
-
-
+ 
+ 
 /* ---------- Kirish ---------- */
 function landing(msg=''){app.innerHTML=`<div class=land><section class=lh><div class=logo><i>◆</i> IELTS Mock</div><h1>Computer-based IELTS mock imtihon platformasi</h1><p>Listening, Reading va Writing — haqiqiy kompyuter imtihoniga o'xshash muhitda.</p></section><section class=lf><div class=card><h3>Talaba kirishi</h3><input id=sl placeholder="Login kodi"><input id=sp type=password placeholder="Parol"><button onclick="A.login(0)">Kirish</button></div><div class=card><h3>Admin kirishi</h3><input id=ae placeholder="Admin email"><input id=ap type=password placeholder="Parol"><button onclick="A.login(1)">Kirish</button></div><p class=no>${msg}</p></section></div>`}
 function shell(tabs,tab,act,ttl,sub,who){app.innerHTML=`<div class=shell><aside class=side><div class=logo><i>◆</i> IELTS Mock</div><small>MENU</small>${tabs.map(t=>`<a class="ni ${t[0]==tab?'on':''}" onclick="${act}('${t[0]}')"><span>${t[2]}</span>${t[1]}</a>`).join('')}<div class=me><div class=av>${esc((who||'?')[0])}</div><div><b>${esc(who)}</b><br><small style="margin:0">${esc(sub)}</small></div><button class=s onclick="A.out()" title="Chiqish">⏻</button></div></aside><main><div class=top><h2>${ttl}</h2><small>${new Date().toLocaleDateString('uz')}</small></div><div id=pg>Yuklanmoqda…</div></main></div>`}
@@ -81,7 +81,7 @@ onAuthStateChanged(auth,async u=>{if(!u)return landing();
  const s=await getDoc(doc(db,'students',u.uid)).catch(()=>null);
  if(s?.exists()&&s.data().active){me=s.data();return student()}
  await signOut(auth);landing("Hisob faol emas yoki topilmadi")});
-
+ 
 /* ---------- Xavfsiz render (skriptlar o'chiriladi) ---------- */
 function clean(html){const d=new DOMParser().parseFromString(html||'','text/html');
  d.querySelectorAll('script,iframe,object,embed,link,style,base,meta').forEach(e=>e.remove());
@@ -90,11 +90,11 @@ function hl(el){el.addEventListener('mouseup',()=>{const s=getSelection();if(s.i
  if(!el.contains(r.commonAncestorContainer)||r.commonAncestorContainer.nodeName=='TEXTAREA')return;
  if(r.cloneContents().querySelector('input,select,textarea'))return;try{const m=document.createElement('mark');r.surroundContents(m)}catch(e){}s.removeAllRanges()});
  el.addEventListener('click',e=>{if(e.target.tagName=='MARK'){const m=e.target;m.replaceWith(...m.childNodes)}})}
-
+ 
 /* ---------- Talaba paneli ---------- */
 async function student(note=''){const uid=auth.currentUser.uid,q=n=>getDocs(query(collection(db,n),where('uid','==',uid)));
  const [ms,ps,as,rs]=await Promise.all([col('mocks'),q('permissions'),q('attempts'),q('results')]);
- const P={},T={},R={};ps.forEach(d=>P[d.id]=d.data().granted);as.forEach(d=>T[d.id]=d.data());rs.forEach(d=>R[d.id]=d.data());
+ const P={},T={},R={};ps.forEach(d=>P[d.data().sectionId]=d.data().granted);as.forEach(d=>T[d.data().sectionId]=d.data());rs.forEach(d=>R[d.data().sectionId]=d.data());
  const cell=(m,t)=>{const sid=m.id+'_'+t,a=T[sid],r=R[sid];
   if(a?.status==='submitted')return `<span class=tag>Topshirilgan</span> ${r?`${r.raw!=null?r.raw+'/'+r.total+' · ':''}Band ${r.band}`:''}`;
   if(a)return `<button onclick="A.open('${sid}')">Davom etish</button>`;
@@ -106,7 +106,7 @@ async function student(note=''){const uid=auth.currentUser.uid,q=n=>getDocs(quer
 A.start=async(mid,t)=>{const uid=auth.currentUser.uid,sid=mid+'_'+t;
  try{await setDoc(doc(db,'attempts',uid+'_'+sid),{uid,sectionId:sid,mockId:mid,type:t,startedAt:serverTimestamp(),status:'in_progress',answers:{}})}
  catch(e){return alert("Boshlab bo'lmadi: ruxsat yo'q yoki bo'lim allaqachon boshlangan")}A.open(sid)};
-
+ 
 A.open=async sid=>{const aid=auth.currentUser.uid+'_'+sid;
  const [as,ss]=await Promise.all([getDoc(doc(db,'attempts',aid)),getDoc(doc(db,'sections',sid))]);
  const at=as.data(),sc=ss.data();if(at.status!=='in_progress')return student();
@@ -155,7 +155,7 @@ A.open=async sid=>{const aid=auth.currentUser.uid+'_'+sid;
  $('#sb').onclick=()=>submit(false);
  const tm=setInterval(()=>{const r=Math.max(0,end-Date.now());$('#tm').className=r<3e5?'low':'';$('#tm').textContent=String(Math.floor(r/6e4)).padStart(2,'0')+':'+String(Math.floor(r/1e3)%60).padStart(2,'0');if(r<=0)submit(true)},1000);
  const sv=setInterval(()=>{if(!done)updateDoc(doc(db,'attempts',aid),{answers:col2()}).then(()=>$('#sv').textContent='Saqlandi ✓').catch(()=>$('#sv').textContent='Saqlanmadi!')},10000)};
-
+ 
 /* ---------- Admin paneli ---------- */
 async function admin(tab){const tabs=[['stats','Dashboard','▦'],['st','Talabalar','👥'],['mk','Mocklar','📝'],['pm','Ruxsatlar','🔑'],['rs','Natijalar','📊']];
  shell(tabs,tab,'A.tab','Salom, Admin 👋','Administrator','Admin');await A['t_'+tab]()}
@@ -180,7 +180,7 @@ A.addSt=async()=>{const name=$('#n').value.trim(),login=$('#lg').value.trim().to
 A.tg=async(id,v)=>{await updateDoc(doc(db,'students',id),{active:v});log('Talaba holati: '+id);A.t_st()};
 A.ed=async id=>{const s=SD.find(x=>x.id==id),n=prompt('Ism',s.name);if(n==null)return;const g=prompt('Guruh',s.group||'');await updateDoc(doc(db,'students',id),{name:n,group:g||''});A.t_st()};
 A.del=async id=>{if(confirm("O'chirilsinmi?")){await deleteDoc(doc(db,'students',id));log("Talaba o'chirildi");A.t_st()}};
-
+ 
 const keys=t=>{const m={};t.split('\n').forEach(l=>{const x=l.match(/^\s*(\d+)\s*[=:.)\-\s]\s*(.+)$/);if(x)m[x[1]]=x[2].split('/').map(norm).filter(Boolean)});return m};
 A.loadJ=(el,id)=>el.files[0]?.text().then(t=>$('#'+id).value=t);
 A.smp=async id=>{$('#'+id).value=await(await fetch('/samples/'+{lj:'listening',rj:'reading',wj:'writing'}[id]+'.json')).text()};
@@ -203,7 +203,7 @@ A.saveMock=async()=>{const f=id=>$('#'+id).files[0],v=id=>$('#'+id).value,up=$('
   await setDoc(doc(db,'sections',Ws),{mockId:id,type:'writing',kind:W.kind||'Academic',t1:W.task1||W.t1||'',t2:W.task2||W.t2||'',img});
   log('Mock yaratildi: '+v('mt'));alert(`Saqlandi: Listening ${L.total} ta, Reading ${R.total} ta savol`);A.t_mk()}catch(e){up.textContent='';alert('Xato: '+e.message)}};
 A.delMock=async id=>{if(!confirm("O'chirilsinmi?"))return;const ls=(await getDoc(doc(db,'sections',id+'_listening'))).data();if(ls?.audio?.id)fetch('/media/'+ls.audio.id,{method:'DELETE',headers:{authorization:'Bearer '+getToken()}});for(const s of SEC){await deleteDoc(doc(db,'sections',id+'_'+s));await deleteDoc(doc(db,'keys',id+'_'+s))}await deleteDoc(doc(db,'mocks',id));log("Mock o'chirildi");A.t_mk()};
-
+ 
 let SM='';
 A.t_pm=async()=>{const [ms,ss,ps,as]=await Promise.all([col('mocks'),col('students'),col('permissions'),col('attempts')]);SM=SM||ms.docs[0]?.id||'';
  const P={},T={};ps.forEach(d=>P[d.id]=d.data().granted);as.forEach(d=>T[d.id]=d.data().status);
@@ -212,7 +212,7 @@ A.t_pm=async()=>{const [ms,ss,ps,as]=await Promise.all([col('mocks'),col('studen
  return `<td>${T[k]=='submitted'?'Topshirgan':T[k]?'Jarayonda':''}<br><button class="${g?'':'s'}" onclick="A.perm('${s.id}','${sid}',${!g})">${g?'Ruxsat ✓':'Ruxsat berish'}</button></td>`}).join('')}</tr>`).join('')}</table></div>`)};
 window.SM=SM;Object.defineProperty(window,'SM',{get:()=>SM,set:v=>SM=v});
 A.perm=async(uid,sid,g)=>{await setDoc(doc(db,'permissions',uid+'_'+sid),{uid,sectionId:sid,mockId:sid.split('_')[0],granted:g});log(`Ruxsat ${g?'berildi':'olindi'}: ${sid}`);A.t_pm()};
-
+ 
 const BT=[[39,9],[37,8.5],[35,8],[33,7.5],[30,7],[27,6.5],[23,6],[19,5.5],[15,5],[13,4.5],[10,4],[8,3.5],[6,3],[4,2.5]];
 const band=(raw,tot)=>(BT.find(t=>Math.round(raw*40/tot)>=t[0])||[0,2])[1];
 A.t_rs=async()=>{const [a,s,ms]=await Promise.all([col('attempts'),col('students'),col('mocks')]),N={},M={};s.forEach(d=>N[d.id]=d.data().name);ms.forEach(d=>M[d.id]=d.data().title);
@@ -235,3 +235,4 @@ A.csv=async()=>{const [r,s]=await Promise.all([col('results'),col('students')]),
  const l=['Talaba,Bo\'lim,To\'g\'ri,Noto\'g\'ri,Javobsiz,Jami,Band',...r.docs.map(d=>d.data()).map(x=>[N[x.uid],x.sectionId,x.correct,x.wrong,x.blank,x.total,x.band].map(v=>`"${v??''}"`).join(','))].join('\n');
  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+l],{type:'text/csv'}));a.download='natijalar.csv';a.click()};
 </script></body></html>
+ 
