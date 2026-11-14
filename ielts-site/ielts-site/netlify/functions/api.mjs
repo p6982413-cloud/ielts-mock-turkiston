@@ -1,7 +1,8 @@
 import {getStore} from '@netlify/blobs';
 import {createHmac,randomBytes,scryptSync,timingSafeEqual,randomUUID} from 'node:crypto';
 const E=process.env,DOM='@ielts-mock.uz',KEY=E.ADMIN_PASSWORD||'',TTL=432e5;
-const COLS=['students','mocks','keys','settings','log','permissions','sections','attempts','results','feedback'];
+/* YANGI: groups, group_permissions, history qo'shildi */
+const COLS=['students','mocks','keys','settings','log','permissions','sections','attempts','results','feedback','groups','group_permissions','history'];
 const J=(o,s=200)=>Response.json(o,{status:s}),NO=()=>J({error:'Ruxsat yo\'q'},403);
 const hm=b=>createHmac('sha256',KEY).update(b).digest('hex');
 const sign=p=>{const b=Buffer.from(JSON.stringify(p)).toString('base64');return b+'.'+hm(b)};
@@ -31,7 +32,8 @@ export default async req=>{
   await s.setJSON('users/'+em,{uid,salt,hash:hash(b.password,salt)});return J({uid})}
 
  if(!COLS.includes(c)||(id&&!/^[\w.@-]+$/.test(id)))return J({error:'Noto\'g\'ri so\'rov'},400);
- const can=async(i,d)=>adm||(c=='students'?i==me:c=='mocks'?true:c=='permissions'?d.uid==me
+ /* YANGI: groups va group_permissions talabalarga ham o'qish uchun ochiq; history faqat admin */
+ const can=async(i,d)=>adm||(c=='students'?i==me:c=='mocks'||c=='groups'||c=='group_permissions'?true:c=='permissions'?d.uid==me
    :c=='sections'?!!await get('attempts',me+'_'+i):['attempts','results','feedback'].includes(c)&&d.uid==me);
 
  if(op=='get'){const d=await get(c,id);if(d&&!await can(id,d))return NO();return J({d})}
@@ -47,7 +49,9 @@ export default async req=>{
    if(cur||d.uid!=me||id!=me+'_'+d.sectionId||d.status!='in_progress'||Object.keys(d.answers||{}).length||!pm?.granted)return NO();
    d.startedAt={__ts:Date.now()};await put(c,id,d);return J({ok:1})}
   if(op=='update'){
-   if(!cur||cur.uid!=me||cur.status!='in_progress'||Date.now()>cur.startedAt.__ts+361e4)return NO();
+   /* YANGI: admin bergan qo'shimcha vaqt (permissions.extra, daqiqa) ni hisobga oladi */
+   const pe=await get('permissions',id),ex=Math.min(Math.max(+pe?.extra||0,0),180)*6e4;
+   if(!cur||cur.uid!=me||cur.status!='in_progress'||Date.now()>cur.startedAt.__ts+361e4+ex)return NO();
    if(!Object.keys(d).every(k=>['answers','status','submittedAt'].includes(k))||!['in_progress','submitted'].includes(d.status||cur.status))return NO();
    if(d.status=='submitted')d.submittedAt={__ts:Date.now()};else delete d.submittedAt;
    await put(c,id,{...cur,...d});return J({ok:1})}
