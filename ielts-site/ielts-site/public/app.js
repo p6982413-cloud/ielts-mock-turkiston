@@ -570,7 +570,7 @@ A.gperm=async(groupName,sid,g)=>{
  A.t_pm();
 };
 
-/* ===== Natijalar (admin): mock → sana → talaba → 3 bo'lim → PDF va Bulk ZIP Eksport ===== */
+/* ===== Natijalar (admin): mock → sana → talaba → 3 bo'lim → PDF, Bulk Tasdiqlash va ZIP Eksport ===== */
 document.head.insertAdjacentHTML('beforeend','<style>'+
 '.pn:not(.all) tr.okr{display:none}.pn.hid{display:none}.lk{cursor:pointer;color:var(--b);font-weight:700}'+
 '#rep{display:none}'+
@@ -615,6 +615,7 @@ function rtbl(){const full=RS.v=='a',rows=rrows(full?'':RS.mock,full?'':RS.date,
  $('#rt').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
   <b>${rows.length} ta talaba</b>
   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+   <button onclick="A.approveAll(this)">✅ Hammaga natijalarni tasdiqlash</button>
    <select id=exGrp style="width:auto;margin:0;padding:7px 10px" title="Eksport uchun guruh">
     <option value="">Barcha guruhlar</option>
     ${grps.map(g=>`<option value="${esc(g)}" ${norm(RS.grp)===norm(g)?'selected':''}>${esc(g)}</option>`).join('')}
@@ -624,13 +625,65 @@ function rtbl(){const full=RS.v=='a',rows=rrows(full?'':RS.mock,full?'':RS.date,
     <option value="reading">📖 Reading (ZIP)</option>
     <option value="listening">🎧 Listening (ZIP)</option>
    </select>
-   <button onclick="A.bulkZip(this)">📦 ZIP eksport</button>
+   <button class=s onclick="A.bulkZip(this)">📦 ZIP eksport</button>
    <button class=s onclick="A.csv()">CSV eksport</button>
    <button class=s onclick="A.bulkRetake()">🔁 Qayta ruxsat (tanlangan bo'lim)</button>
   </div>
  </div>`+
  (rows.length?`<table><tr><th>Talaba</th><th>Guruh</th>${full?'<th>Mock</th>':''}<th>Sana</th><th>🎧 Listening</th><th>📖 Reading</th><th>✍️ Writing</th><th>Umumiy</th></tr>${rows.map(g=>`<tr><td><a class=lk onclick="A.stu('${g.mockId}','${g.uid}')">${esc(RD.N[g.uid]||'—')}</a></td><td>${esc(RD.G[g.uid]||'')}</td>${full?`<td>${esc(RD.M[g.mockId]?.title||'—')}</td>`:''}<td>${fd(g.d)}</td>${SEC.map(t=>`<td>${cell2(g.S[t])}</td>`).join('')}<td><b>${ovl(g)??'—'}</b></td></tr>`).join('')}</table>`:'<p class=mut>Bu yerda hali hech kim ishlamagan</p>')+
- `<p class=mut><small>* — avtomatik hisoblangan band, talabaga hali ko'rsatilmagan (talaba ismini bosib, "Natijani saqlash va talabaga ko'rsatish" ni bosing). "Baholanmagan" — Writing hali tekshirilmagan.</small></p>`}
+ `<p class=mut><small>* — avtomatik hisoblangan band, talabaga hali ko'rsatilmagan ("✅ Hammaga natijalarni tasdiqlash" tugmasini bossangiz, jadvaldagi barcha talabalarning Listening va Reading natijalari hamda 1–40 savollar tahlili birdaniga tasdiqlanadi).</small></p>`}
+
+/* ---- Hammaga bir tugma bilan tasdiq berish (Listening + Reading, 1–40 to'liq tafsilotlar bilan) ---- */
+A.approveAll=async btn=>{
+ const rows=RS.cur||[];
+ if(!rows.length)return alert('Tasdiqlash uchun talabalar topilmadi.');
+ const targets=[];
+ rows.forEach(g=>{
+  ['listening','reading'].forEach(t=>{
+   const at=g.S[t];
+   if(!at||at.status!=='submitted')return;
+   const gr=grade(at);
+   if(!gr)return;
+   const old=RES[at.id];
+   if(!old||old.band==null||!Array.isArray(old.details)||!old.details.length){
+    targets.push({at,gr,old});
+   }
+  });
+ });
+ if(!targets.length)return alert("Jadvaldagi barcha topshirilgan Listening va Reading natijalari allaqachon tasdiqlangan ✓");
+ if(!confirm(`${targets.length} ta Listening/Reading natijasi va barcha 1–40 savol javoblari tasdiqlanib, o'quvchilarga ochiladi. Davom etasizmi?`))return;
+ const t0=btn?.textContent;
+ if(btn){btn.disabled=true;btn.textContent='Tasdiqlanmoqda…'}
+ try{
+  await Promise.all(targets.map(async({at,gr,old})=>{
+   const keepManual=old?.manual&&old?.band!=null;
+   const o={
+    uid:at.uid,
+    sectionId:at.sectionId,
+    mockId:at.mockId,
+    type:at.type,
+    correct:gr.c,
+    wrong:gr.w,
+    blank:gr.b,
+    total:gr.tot,
+    raw:gr.c,
+    band:keepManual?old.band:gr.bd,
+    manual:!!keepManual,
+    details:gr.rows,
+    t:serverTimestamp()
+   };
+   await setDoc(doc(db,'results',at.id),o);
+   RES[at.id]=o;
+  }));
+  log(`Ommaviy natija tasdiqlandi: ${targets.length} ta bo'lim`);
+  rtbl();
+  alert(`Tayyor! ${targets.length} ta bo'lim tasdiqlandi — endi barcha o'quvchilar o'z natijalari va 1–40 savollarini (ham to'g'ri, ham xatolarini) ko'ra oladi.`);
+ }catch(e){
+  alert('Xato: '+(e?.message||e));
+ }finally{
+  if(btn){btn.disabled=false;btn.textContent=t0}
+ }
+};
 
 function rview(){const v=RS.v;
  const grps=[...new Set(Object.values(RD.G).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
