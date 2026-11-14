@@ -131,7 +131,7 @@ body.dk{--ln:#27332e;background:#0e1512;color:#e5ece8}
 <body>
 
 <div id="intro-overlay">
-  <video id="intro-video" src="./intro.mp4" autoplay muted playsinline preload="auto"></video>
+  <video id="intro-video" src="./intro.mp4/gemini_generated_video_56074724.mp4" autoplay muted playsinline preload="auto"></video>
   <button id="skip-intro" onclick="closeIntro()">O'tkazib yuborish →</button>
 </div>
 
@@ -150,19 +150,15 @@ function closeIntro() {
   }
 }
 
-// Video to'liq tugaganda yopiladi
 video.addEventListener('ended', closeIntro);
 
-// Video haqiqatda o'ynashni boshlagandan keyingina zaxira taymer (5.5 soniya) ishga tushadi
 video.addEventListener('playing', () => {
   clearTimeout(fallbackTimer);
   fallbackTimer = setTimeout(closeIntro, 5500);
 });
 
-// Agar fayl topilmasa yoki xatolik bersa yopiladi
 video.addEventListener('error', closeIntro);
 
-// Agar internet juda sekin bo'lib, video 12 soniya ichida ham yuklanmasa, sayt ochiladi
 fallbackTimer = setTimeout(closeIntro, 12000);
 </script>
 <script type="module" src="./app.js"></script>
