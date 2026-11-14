@@ -68,7 +68,7 @@ async function hasSectionAccess(uid,sid,groupName){
  return gpAll.docs.some(d=>{const x=d.data();return x.sectionId===sid&&norm(x.groupName)===norm(gn)&&x.granted});
 }
 
-/* ---------- Avtomatik baholash yordamchisi (Listening va Reading uchun) ---------- */
+/* ---------- Avtomatik baholash yordamchisi (keys ruxsati bo'lsa darhol hisoblaydi) ---------- */
 async function autoSaveObjectiveResult(uid,sid,mid,type,ans){
  if(type!=='listening'&&type!=='reading')return null;
  const kDoc=await getDoc(doc(db,'keys',sid)).catch(()=>null);
@@ -77,57 +77,40 @@ async function autoSaveObjectiveResult(uid,sid,mid,type,ans){
  const nums=Object.keys(k).map(Number).sort((x,y)=>x-y);
  if(!nums.length)return null;
  let c=0,w=0,b=0;
- nums.forEach(n=>{const g=norm(ans[n]),ok=!!g&&k[n].includes(g);g?(ok?c++:w++):b++});
- const resObj={uid,sectionId:sid,mockId:mid,type,correct:c,wrong:w,blank:b,total:nums.length,raw:c,band:band(c,nums.length||40),manual:false,t:serverTimestamp()};
+ const details=nums.map(n=>{
+  const given=ans[n]||'',g=norm(given),ok=!!g&&k[n].includes(g);
+  g?(ok?c++:w++):b++;
+  return {n,given,key:k[n].join(' / '),ok,blank:!g};
+ });
+ const resObj={uid,sectionId:sid,mockId:mid,type,correct:c,wrong:w,blank:b,total:nums.length,raw:c,band:band(c,nums.length||40),manual:false,details,t:serverTimestamp()};
  await setDoc(doc(db,'results',uid+'_'+sid),resObj,{merge:true}).catch(()=>{});
  return resObj;
 }
 
 /* ---------- Talaba paneli ---------- */
-let ST_CACHE={M:{},T:{},R:{},K:{}};
+let ST_CACHE={M:{},T:{},R:{}};
 async function student(note='',tab=window.stab||'h'){window.stab=tab;const uid=auth.currentUser.uid,q=n=>getDocs(query(collection(db,n),where('uid','==',uid)));
  const stDoc=await getDoc(doc(db,'students',uid)).catch(()=>null);
  if(stDoc?.exists())me={id:uid,...stDoc.data()};
- const [ms,ps,gps,as,rs,ks]=await Promise.all([
+ const [ms,ps,gps,as,rs]=await Promise.all([
   col('mocks'),
   q('permissions'),
   col('group_permissions').catch(()=>({docs:[]})),
   q('attempts'),
-  q('results'),
-  col('keys').catch(()=>({docs:[]}))
+  q('results')
  ]);
- const P={},T={},R={},K={};
+ const P={},T={},R={};
  ps.forEach(d=>P[d.data().sectionId]=d.data().granted);
  const myGrp=norm(me.group||'');
  if(myGrp){gps.docs.forEach(d=>{const x=d.data();if(norm(x.groupName)===myGrp&&x.granted)P[x.sectionId]=true})}
  as.forEach(d=>T[d.data().sectionId]=d.data());
  rs.forEach(d=>R[d.data().sectionId]=d.data());
- ks.docs.forEach(d=>K[d.id]=d.data().map||{});
-
- /* Agar talaba Listening/Reading ni topshirgan bo'lsa-yu, hali results ga yozilmagan bo'lsa — avtomatik hisoblab ko'rsatish */
- for(const [sid,a] of Object.entries(T)){
-  if(a.status==='submitted'&&(a.type==='listening'||a.type==='reading')&&(!R[sid]||R[sid].band==null)){
-   let map=K[sid];
-   if(!map){
-    const kd=await getDoc(doc(db,'keys',sid)).catch(()=>null);
-    if(kd?.exists()){map=kd.data().map||{};K[sid]=map}
-   }
-   if(map&&Object.keys(map).length){
-    const nums=Object.keys(map).map(Number).sort((x,y)=>x-y),ans=a.answers||{};
-    let c=0,w=0,b=0;
-    nums.forEach(n=>{const g=norm(ans[n]),ok=!!g&&map[n].includes(g);g?(ok?c++:w++):b++});
-    const autoR={uid,sectionId:sid,mockId:a.mockId,type:a.type,correct:c,wrong:w,blank:b,total:nums.length,raw:c,band:band(c,nums.length||40),manual:false};
-    R[sid]=autoR;
-    setDoc(doc(db,'results',uid+'_'+sid),{...autoR,t:serverTimestamp()},{merge:true}).catch(()=>{});
-   }
-  }
- }
 
  const D=x=>x?.toMillis?x.toMillis():0,KDate=t=>{const d=new Date(t);return d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate()},IC={listening:'🎧',reading:'📖',writing:'✍️'},NM={listening:'Listening',reading:'Reading',writing:'Writing'},M={};ms.forEach(m=>M[m.id]=m.data());
- ST_CACHE={M,T,R,K};
+ ST_CACHE={M,T,R};
 
  const cell=(m,t)=>{const sid=m.id+'_'+t,a=T[sid],r=R[sid];
-  if(a?.status==='submitted')return `<span class=tag>Topshirilgan</span> ${r?`${r.raw!=null?r.raw+'/'+r.total+' · ':''}Band ${r.band}`:''}`;
+  if(a?.status==='submitted')return `<span class=tag>Topshirilgan</span> ${r&&r.band!=null?`${r.raw!=null?r.raw+'/'+r.total+' · ':''}Band ${r.band}`:''}`;
   if(a)return `<button onclick="A.open('${sid}')">Davom etish</button>`;
   return P[sid]?`<button onclick="A.start('${m.id}','${t}')">START</button>`:'<span class=tag style="background:#f1f5f9;color:#64748b">🔒 Yopiq</span>'};
  const at=Object.values(T),sub=at.filter(x=>x.status==='submitted'),rows=Object.entries(R).filter(([k,r])=>r.band!=null).map(([k,r])=>({r,type:r.type||T[k]?.type,t:D(T[k]?.submittedAt)||D(T[k]?.startedAt)})).sort((x,y)=>y.t-x.t);
@@ -163,8 +146,8 @@ async function student(note='',tab=window.stab||'h'){window.stab=tab;const uid=a
    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px">
     <div><h3 style="margin:0">${esc(m.title||'Mock')}</h3><small class=mut>${esc(m.date||'')}</small></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
-     ${hasObj?`<button class=s onclick="A.review('${mid}',this)">🔍 Xatolar tahlili</button>`:''}
-     <button onclick="A.myPdf('${mid}',this)">⬇ PDF yuklash (barcha xatolar bilan)</button>
+     ${hasObj?`<button class=s onclick="A.review('${mid}',this)">📋 Batafsil javoblar (1–40)</button>`:''}
+     <button onclick="A.myPdf('${mid}',this)">⬇ PDF yuklash (to'liq natija)</button>
     </div>
    </div>
    <div class=sg>${[['🎧 Listening',vals[0]],['📖 Reading',vals[1]],['✍️ Writing',vals[2]],['🏆 Umumiy',ov]].map(x=>`<div class=sc><small>${x[0]}</small><h2>${x[1]}</h2></div>`).join('')}</div>
@@ -184,40 +167,47 @@ async function student(note='',tab=window.stab||'h'){window.stab=tab;const uid=a
  :tab=='m'?`<div class=card><h3>Mock imtihonlar</h3>${mocks}</div>`:tab=='r'?`${mockCards}${hist}`
  :`<div class=card><h3>Yutuqlar</h3><div class=bg style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr))">${BG.map(b=>`<div class="${b[3]?'':'off'}"><b>${b[0]}</b>${b[1]}<br><small>${b[2]}</small></div>`).join('')}</div></div>`)};
 
-/* ---------- Talabaning xatolar tahlilini ekranda ochib ko'rsatish ---------- */
+/* ---------- Talaba uchun barcha savollar ro'yxatini olish (results.details yoki keys orqali) ---------- */
+async function getStudentSectionDetails(mid,t){
+ const sid=mid+'_'+t,a=ST_CACHE.T[sid],r=ST_CACHE.R[sid];
+ if(!a||a.status!=='submitted')return null;
+ if(Array.isArray(r?.details)&&r.details.length){
+  return {rows:r.details,c:r.correct??r.raw??0,w:r.wrong??0,b:r.blank??0,tot:r.total??r.details.length,bd:r.band};
+ }
+ const kd=await getDoc(doc(db,'keys',sid)).catch(()=>null);
+ if(kd?.exists()){
+  const k=kd.data().map||{},ans=a.answers||{},nums=Object.keys(k).map(Number).sort((x,y)=>x-y);
+  let c=0,w=0,b=0;
+  const rows=nums.map(n=>{const given=ans[n]||'',g=norm(given),ok=!!g&&k[n].includes(g);g?(ok?c++:w++):b++;return{n,given,key:k[n].join(' / '),ok,blank:!g}});
+  return {rows,c,w,b,tot:nums.length,bd:r?.band??band(c,nums.length||40)};
+ }
+ const ans=a.answers||{},nums=Object.keys(ans).map(Number).sort((x,y)=>x-y);
+ if(nums.length){
+  return {rows:nums.map(n=>({n,given:ans[n],key:null,ok:null,blank:!ans[n]})),c:r?.correct??r?.raw??null,w:r?.wrong??null,b:r?.blank??null,tot:r?.total??nums.length,bd:r?.band??null,noKey:true};
+ }
+ return null;
+}
+
+/* ---------- Talabaning barcha savollar tahlilini ekranda ko'rsatish ---------- */
 A.review=async(mid,btn)=>{
  const box=$('#rev_'+mid);if(!box)return;
  if(box.innerHTML.trim()){box.innerHTML='';return}
  const t0=btn?.textContent;if(btn){btn.disabled=true;btn.textContent='Yuklanmoqda…'}
  try{
   const buildSec=async(t,title)=>{
-   const a=ST_CACHE.T[mid+'_'+t];
-   if(!a||a.status!=='submitted')return '';
-   let k=ST_CACHE.K[mid+'_'+t];
-   if(!k){
-    const kd=await getDoc(doc(db,'keys',mid+'_'+t)).catch(()=>null);
-    if(kd?.exists()){k=kd.data().map||{};ST_CACHE.K[mid+'_'+t]=k}
-   }
-   if(!k)return `<p class=mut>${title}: javob kaliti topilmadi.</p>`;
-   const ans=a.answers||{},nums=Object.keys(k).map(Number).sort((x,y)=>x-y);
-   let c=0,w=0,b=0;
-   const rows=nums.map(n=>{
-    const given=ans[n]||'',g=norm(given),ok=!!g&&k[n].includes(g);
-    g?(ok?c++:w++):b++;
-    return {n,given,key:k[n].join(' / '),ok,blank:!g};
-   });
+   const d=await getStudentSectionDetails(mid,t);
+   if(!d)return '';
    return `<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--ln)">
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
-     <h4 style="margin:0">${title} — To'g'ri: <span class=ok>${c}</span> / ${nums.length} · Xato: <span class=no>${w}</span> · Javobsiz: ${b}</h4>
-     <button class=s style="padding:4px 10px;margin:0" onclick="this.closest('div').nextElementSibling.querySelectorAll('tr.okrow').forEach(r=>r.hidden=!r.hidden)">Faqat xatolar / Hammasi</button>
+     <h4 style="margin:0">${title}${d.c!=null?` — To'g'ri: <span class=ok>${d.c}</span> / ${d.tot} · Noto'g'ri: <span class=no>${d.w}</span> · Javobsiz: ${d.b}`:''}</h4>
     </div>
     <table>
      <tr><th>#</th><th>Sizning javobingiz</th><th>To'g'ri javob</th><th>Holat</th></tr>
-     ${rows.map(r=>`<tr class="${r.ok?'okrow':''}" style="${!r.ok?'background:#fef2f2':''}">
+     ${d.rows.map(r=>`<tr style="${r.ok===false?'background:#fef2f2':r.ok===true?'background:#f0fdf4':''}">
       <td><b>${r.n}</b></td>
       <td>${esc(r.given||'—')}</td>
-      <td><b>${esc(r.key)}</b></td>
-      <td class="${r.ok?'ok':'no'}">${r.blank?'Javobsiz':r.ok?"✓ To'g'ri":"✗ Noto'g'ri"}</td>
+      <td><b>${r.key!=null?esc(r.key):'Admin tasdiqlashi kutilmoqda'}</b></td>
+      <td class="${r.ok===true?'ok':r.ok===false?'no':'mut'}">${r.ok==null?'Tekshirilmoqda':r.blank?'Javobsiz':r.ok?"✓ To'g'ri":"✗ Noto'g'ri"}</td>
      </tr>`).join('')}
     </table>
    </div>`;
@@ -227,39 +217,29 @@ A.review=async(mid,btn)=>{
  }finally{if(btn){btn.disabled=false;btn.textContent=t0}}
 };
 
-/* ---------- Talabaning shaxsiy natijasini PDF yuklab olish (barcha savollar va xatolar bilan) ---------- */
+/* ---------- Talabaning shaxsiy natijasini PDF yuklab olish (barcha 1–40 savollar to'liq) ---------- */
 A.myPdf=async(mid,btn)=>{
  const uid=auth.currentUser.uid,M=ST_CACHE.M[mid]||{},nm=me.name||'Talaba';
  const t0=btn?.textContent;if(btn){btn.disabled=true;btn.textContent='PDF tayyorlanmoqda…'}
  try{
-  const [ws,fb,lk,rk]=await Promise.all([
+  const [ws,fb,dL,dR]=await Promise.all([
    getDoc(doc(db,'sections',mid+'_writing')).catch(()=>null),
    getDoc(doc(db,'feedback',uid+'_'+mid+'_writing')).catch(()=>null),
-   getDoc(doc(db,'keys',mid+'_listening')).catch(()=>null),
-   getDoc(doc(db,'keys',mid+'_reading')).catch(()=>null)
+   getStudentSectionDetails(mid,'listening'),
+   getStudentSectionDetails(mid,'reading')
   ]);
   const S=ws?.exists()?ws.data():{},F=fb?.exists()?fb.data():{};
-  const KM={listening:lk?.exists()?lk.data().map:ST_CACHE.K[mid+'_listening'],reading:rk?.exists()?rk.data().map:ST_CACHE.K[mid+'_reading']};
   const rL=ST_CACHE.R[mid+'_listening'],rR=ST_CACHE.R[mid+'_reading'],rW=ST_CACHE.R[mid+'_writing'];
   const bs=[rL?.band??null,rR?.band??null,rW?.band??null];
   const ob=bs.every(x=>x!=null)?Math.round(bs.reduce((x,y)=>x+y,0)/3*2)/2:null;
 
-  const gt=t=>{
+  const gt=(t,d)=>{
    const a=ST_CACHE.T[mid+'_'+t],r=ST_CACHE.R[mid+'_'+t];
    if(!a)return "<p>Bu bo'lim ishlanmagan.</p>";
    if(a.status!=='submitted')return '<p>Topshirilmagan.</p>';
-   const k=KM[t];
-   if(!k)return `<p>Natija: ${r?.raw!=null?r.raw+'/'+r.total+' · ':''}Band: <b>${r?.band??'—'}</b></p>`;
-   const ans=a.answers||{},nums=Object.keys(k).map(Number).sort((x,y)=>x-y);
-   let c=0,w=0,b=0;const allRows=[];
-   nums.forEach(n=>{
-    const given=ans[n]||'',g=norm(given),ok=!!g&&k[n].includes(g);
-    g?(ok?c++:w++):b++;
-    allRows.push({n,given,key:k[n].join(' / '),ok,blank:!g});
-   });
-   const bd=r?.band??band(c,nums.length||40);
-   return `<p>Jami: ${nums.length} · To'g'ri: ${c} · Noto'g'ri: ${w} · Javobsiz: ${b} · Band: <b>${bd}</b></p>`+
-    `<table><tr><th>#</th><th>Sizning javobingiz</th><th>To'g'ri javob</th><th>Holat</th></tr>${allRows.map(x=>`<tr style="${!x.ok?'background:#fee2e2':''}"><td>${x.n}</td><td>${esc(x.given||'—')}</td><td>${esc(x.key)}</td><td>${x.blank?'Javobsiz':x.ok?"To'g'ri":"Noto'g'ri"}</td></tr>`).join('')}</table>`;
+   if(!d)return `<p>Natija: ${r?.raw!=null?r.raw+'/'+r.total+' · ':''}Band: <b>${r?.band??'—'}</b></p>`;
+   return `<p>Jami: ${d.tot}${d.c!=null?` · To'g'ri: ${d.c} · Noto'g'ri: ${d.w} · Javobsiz: ${d.b}`:''} · Band: <b>${d.bd??r?.band??'—'}</b></p>`+
+    `<table><tr><th>#</th><th>Sizning javobingiz</th><th>To'g'ri javob</th><th>Holat</th></tr>${d.rows.map(x=>`<tr style="${x.ok===false?'background:#fee2e2':x.ok===true?'background:#dcfce7':''}"><td>${x.n}</td><td>${esc(x.given||'—')}</td><td>${x.key!=null?esc(x.key):'—'}</td><td>${x.ok==null?'Tekshirilmoqda':x.blank?'Javobsiz':x.ok?"To'g'ri":"Noto'g'ri"}</td></tr>`).join('')}</table>`;
   };
 
   const wA=ST_CACHE.T[mid+'_writing'],wa=wA?.answers||{};
@@ -268,10 +248,12 @@ A.myPdf=async(mid,btn)=>{
    (F.c?.some(x=>x!=null)?`<table><tr>${CR.map(x=>`<th>${x}</th>`).join('')}</tr><tr>${F.c.map(x=>`<td>${esc(x??'—')}</td>`).join('')}</tr></table>`:'')+
    (F.comment?`<h3>O'qituvchi izohi</h3><div class=tx>${esc(F.comment)}</div>`:'');
 
-  const H=`<div class=hd><img src="${LOGO}" alt=""><div><h1>TURKISTON LC</h1><div>IELTS Mock natijasi va xatolar tahlili</div></div></div>`
+  const H=`<div class=hd><img src="${LOGO}" alt=""><div><h1>TURKISTON LC</h1><div>IELTS Mock — Umumiy natijalar varaqasi</div></div></div>`
    +`<h2>${esc(nm)}</h2><p>Guruh: ${esc(me.group||'—')} · Mock: ${esc(M.title||'')}${M.date?' · '+fd(M.date):''}</p>`
    +`<table><tr><th>Listening</th><th>Reading</th><th>Writing</th><th>Umumiy</th></tr><tr><td>${rL?.band??'—'}</td><td>${rR?.band??'—'}</td><td>${rW?.band??'—'}</td><td><b>${ob??'—'}</b></td></tr></table>`
-   +`<h2>Listening — to'liq tahlil</h2>${gt('listening')}<h2>Reading — to'liq tahlil</h2>${gt('reading')}<h2>Writing</h2>${wt}`;
+   +`<h2>Listening — barcha javoblar (1–${dL?.tot||40})</h2>${gt('listening',dL)}`
+   +`<h2>Reading — barcha javoblar (1–${dR?.tot||40})</h2>${gt('reading',dR)}`
+   +`<h2>Writing</h2>${wt}`;
 
   const fn=('Natija - '+nm+' - '+(M.title||'mock')).replace(/[\\/:*?"<>|]+/g,' ').trim()+'.pdf',
   pr=()=>{const d=document.createElement('div');d.id='rep';d.className='rp';d.innerHTML=H;document.body.append(d);const tOld=document.title;document.title=fn.replace(/\.pdf$/,'');const fin=()=>{d.remove();document.title=tOld;removeEventListener('afterprint',fin)};addEventListener('afterprint',fin);setTimeout(()=>window.print(),100)},
@@ -300,7 +282,7 @@ A.start=async(mid,t)=>{const uid=auth.currentUser.uid,sid=mid+'_'+t;
 A.open=async sid=>{const uid=auth.currentUser.uid,aid=uid+'_'+sid;
  const [as,ss,pe]=await Promise.all([getDoc(doc(db,'attempts',aid)),getDoc(doc(db,'sections',sid)),getDoc(doc(db,'permissions',aid)).catch(()=>null)]);
  const at=as.data(),sc=ss.data();if(at.status!=='in_progress')return student();
- const extra=+(pe?.exists()?pe.data().extra:0)||0; /* admin bergan qo'shimcha vaqt (daqiqa) */
+ const extra=+(pe?.exists()?pe.data().extra:0)||0;
  const start=at.startedAt.toMillis(),end=start+(Math.min(sc.minutes||60,60)+extra)*6e4,t=sc.type,ans=at.answers||{};let done=false,aud=null;
  const ex=document.createElement('div');ex.className='exam';
  ex.innerHTML=`<div class=bar><b style="margin:0">${t.toUpperCase()}</b><button class=s id=fs>To'liq ekran</button><span id=sv></span><b id=tm></b><button id=sb>Topshirish</button></div><div class=split><div id=L></div><div id=R></div></div><div class=nav id=nv></div>`;
@@ -347,7 +329,7 @@ A.open=async sid=>{const uid=auth.currentUser.uid,aid=uid+'_'+sid;
    await autoSaveObjectiveResult(uid,sid,at.mockId||sid.split('_')[0],t,finalAns);
   }catch(e){alert('Saqlashda xato: '+e.message)}
   ex.remove();document.exitFullscreen?.().catch(()=>{});
-  student(t==='writing'?"Writing topshirildi. Natija tekshirilgandan so'ng chiqadi.":"Bo'lim topshirildi! Natijangizni 'Natijalar' bo'limida ko'rishingiz mumkin.",t==='writing'?'h':'r')};
+  student("Bo'lim topshirildi. Admin natijani tasdiqlaganidan so'ng 'Natijalar' bo'limida ko'rinadi.",'r')};
  $('#sb').onclick=()=>submit(false);
  const tm=setInterval(()=>{const r=Math.max(0,end-Date.now());$('#tm').className=r<3e5?'low':'';$('#tm').textContent=String(Math.floor(r/6e4)).padStart(2,'0')+':'+String(Math.floor(r/1e3)%60).padStart(2,'0');if(r<=0)submit(true)},1000);
  const sv=setInterval(()=>{if(!done)updateDoc(doc(db,'attempts',aid),{answers:col2()}).then(()=>$('#sv').textContent='Saqlandi ✓').catch(()=>$('#sv').textContent='Saqlanmadi!')},10000)};
@@ -648,7 +630,7 @@ function rtbl(){const full=RS.v=='a',rows=rrows(full?'':RS.mock,full?'':RS.date,
   </div>
  </div>`+
  (rows.length?`<table><tr><th>Talaba</th><th>Guruh</th>${full?'<th>Mock</th>':''}<th>Sana</th><th>🎧 Listening</th><th>📖 Reading</th><th>✍️ Writing</th><th>Umumiy</th></tr>${rows.map(g=>`<tr><td><a class=lk onclick="A.stu('${g.mockId}','${g.uid}')">${esc(RD.N[g.uid]||'—')}</a></td><td>${esc(RD.G[g.uid]||'')}</td>${full?`<td>${esc(RD.M[g.mockId]?.title||'—')}</td>`:''}<td>${fd(g.d)}</td>${SEC.map(t=>`<td>${cell2(g.S[t])}</td>`).join('')}<td><b>${ovl(g)??'—'}</b></td></tr>`).join('')}</table>`:'<p class=mut>Bu yerda hali hech kim ishlamagan</p>')+
- `<p class=mut><small>* — avtomatik hisoblangan band. "Baholanmagan" — Writing hali tekshirilmagan.</small></p>`}
+ `<p class=mut><small>* — avtomatik hisoblangan band, talabaga hali ko'rsatilmagan (talaba ismini bosib, "Natijani saqlash va talabaga ko'rsatish" ni bosing). "Baholanmagan" — Writing hali tekshirilmagan.</small></p>`}
 
 function rview(){const v=RS.v;
  const grps=[...new Set(Object.values(RD.G).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
@@ -848,21 +830,24 @@ A.hist=async(mid,uid)=>{const el=$('#hx');if(!el)return;
  if(!h.length)return;
  el.innerHTML=`<h4>Oldingi urinishlar</h4><table><tr><th>Bo'lim</th><th>Boshlangan</th><th>Band</th><th>Javoblar soni</th><th>Arxivlangan</th></tr>${h.map(x=>`<tr><td>${esc(x.type)}</td><td>${x.startedMs?new Date(x.startedMs).toLocaleString('uz'):'—'}</td><td>${x.result?.band??'—'}</td><td>${Object.keys(x.answers||{}).length}</td><td>${ts(x.archivedAt)}</td></tr>`).join('')}</table>`};
 
+/* ---------- Admin natijani saqlaganda barcha 1–40 savol tahlili (details) ham bazaga yoziladi ---------- */
 A.saveR=async aid=>{const at=ATT[aid],g=grade(at),ov=$('#ov_'+aid).value;if(!g)return alert('Javob kaliti topilmadi');
- const o={uid:at.uid,sectionId:at.sectionId,mockId:at.mockId,type:at.type,correct:g.c,wrong:g.w,blank:g.b,total:g.tot,raw:g.c,band:ov!==''?+ov:g.bd,manual:ov!=='',t:serverTimestamp()};
- await setDoc(doc(db,'results',aid),o);RES[aid]=o;log('Natija saqlandi: '+aid);alert("Saqlandi — natija talabaga ko'rinadi");A.stu(RS.sm,RS.su)};
+ const o={uid:at.uid,sectionId:at.sectionId,mockId:at.mockId,type:at.type,correct:g.c,wrong:g.w,blank:g.b,total:g.tot,raw:g.c,band:ov!==''?+ov:g.bd,manual:ov!=='',details:g.rows,t:serverTimestamp()};
+ await setDoc(doc(db,'results',aid),o);RES[aid]=o;log('Natija saqlandi: '+aid);alert("Saqlandi — natija va barcha 1–40 savollar talabaga ko'rinadi");A.stu(RS.sm,RS.su)};
 A.saveW=async aid=>{const at=ATT[aid],c=[...document.querySelectorAll('.fc')].map(x=>x.value===''?null:+x.value),v=c.filter(x=>x!=null),avg=v.length==4?Math.round(v.reduce((x,y)=>x+y,0)/4*2)/2:null;
  await setDoc(doc(db,'feedback',aid),{uid:at.uid,c,comment:$('#fcm').value});
  if(avg!=null){const o={uid:at.uid,sectionId:at.sectionId,mockId:at.mockId,type:'writing',band:avg,manual:true};await setDoc(doc(db,'results',aid),o);RES[aid]=o}
  log('Writing baholandi: '+aid);alert('Saqlandi'+(avg!=null?' · Writing band: '+avg:" · (band hisoblanishi uchun 4 ta mezonni ham to'ldiring)"));A.stu(RS.sm,RS.su)};
+
+/* ---------- Admin PDF yuklab olish: Listening va Reading bo'yicha BARCHA savollar (1–40) chiqadi ---------- */
 A.pdf=async btn=>{const mid=RS.sm,uid=RS.su,M=RD.M[mid]||{},S=RS.S||{},nm=RD.N[uid]||'',at=t=>ATT[uid+'_'+mid+'_'+t];
  const fc=[...document.querySelectorAll('.fc')].map(x=>x.value),cm=$('#fcm')?.value||'',wl=fc.length==4&&fc.every(x=>x!=='')?Math.round(fc.reduce((x,y)=>x+ +y,0)/4*2)/2:null;
  const sl=sb(at('listening')),sr=sb(at('reading')),sw=sb(at('writing')),wb=wl??sw.band,bs=[sl.band,sr.band,wb],ob=bs.every(x=>x!=null)?Math.round(bs.reduce((x,y)=>x+y)/3*2)/2:null;
  const gt=t=>{const a=at(t);if(!a)return "<p>Bu bo'lim ishlanmagan.</p>";if(a.status!=='submitted')return '<p>Topshirilmagan.</p>';const g=grade(a);if(!g)return '';
-  return `<p>Jami: ${g.tot} · To'g'ri: ${g.c} · Noto'g'ri: ${g.w} · Javobsiz: ${g.b}</p>`+`<table><tr><th>#</th><th>Sizning javobingiz</th><th>To'g'ri javob</th><th>Holat</th></tr>${g.rows.map(x=>`<tr style="${!x.ok?'background:#fee2e2':''}"><td>${x.n}</td><td>${esc(x.given||'—')}</td><td>${esc(x.key)}</td><td>${x.blank?'Javobsiz':x.ok?"To'g'ri":"Noto'g'ri"}</td></tr>`).join('')}</table>`};
+  return `<p>Jami: ${g.tot} · To'g'ri: ${g.c} · Noto'g'ri: ${g.w} · Javobsiz: ${g.b}</p>`+`<table><tr><th>#</th><th>Sizning javobingiz</th><th>To'g'ri javob</th><th>Holat</th></tr>${g.rows.map(x=>`<tr style="${!x.ok?'background:#fee2e2':'background:#dcfce7'}"><td>${x.n}</td><td>${esc(x.given||'—')}</td><td>${esc(x.key)}</td><td>${x.blank?'Javobsiz':x.ok?"To'g'ri":"Noto'g'ri"}</td></tr>`).join('')}</table>`};
  const wA=at('writing'),wa=wA?.answers||{},
  wt=!wA?"<p>Bu bo'lim ishlanmagan.</p>":[1,2].map(i=>`<h3>Task ${i} (${wc(wa['t'+i]||'')} so'z)</h3><div class=tx><b>Savol:</b>\n${esc(S['t'+i])}${i==1&&/^data:image\//.test(S.img||'')?`<br><img src="${esc(S.img)}" style="max-width:100%;margin-top:6px">`:''}</div><div class=tx>${wa['t'+i]?esc(wa['t'+i]):'<i>Yozilmagan</i>'}</div>`).join('')+(fc.some(x=>x!=='')?`<table><tr>${CR.map(x=>`<th>${x}</th>`).join('')}</tr><tr>${fc.map(x=>`<td>${esc(x)||'—'}</td>`).join('')}</tr></table>`:'')+(cm?`<h3>O'qituvchi izohi</h3><div class=tx>${esc(cm)}</div>`:'');
- const H=`<div class=hd><img src="${LOGO}" alt=""><div><h1>TURKISTON LC</h1><div>IELTS Mock natijasi</div></div></div><h2>${esc(nm)}</h2><p>Guruh: ${esc(RD.G[uid]||'—')} · Mock: ${esc(M.title||'')}${M.date?' · '+fd(M.date):''}</p><table><tr><th>Listening</th><th>Reading</th><th>Writing</th><th>Umumiy</th></tr><tr><td>${sl.band??'—'}</td><td>${sr.band??'—'}</td><td>${wb??'—'}</td><td><b>${ob??'—'}</b></td></tr></table><h2>Writing</h2>${wt}<h2>Reading — to'liq tahlil</h2>${gt('reading')}<h2>Listening — to'liq tahlil</h2>${gt('listening')}`;
+ const H=`<div class=hd><img src="${LOGO}" alt=""><div><h1>TURKISTON LC</h1><div>IELTS Mock — Umumiy natijalar varaqasi</div></div></div><h2>${esc(nm)}</h2><p>Guruh: ${esc(RD.G[uid]||'—')} · Mock: ${esc(M.title||'')}${M.date?' · '+fd(M.date):''}</p><table><tr><th>Listening</th><th>Reading</th><th>Writing</th><th>Umumiy</th></tr><tr><td>${sl.band??'—'}</td><td>${sr.band??'—'}</td><td>${wb??'—'}</td><td><b>${ob??'—'}</b></td></tr></table><h2>Listening — umumiy natija (1–40)</h2>${gt('listening')}<h2>Reading — umumiy natija (1–40)</h2>${gt('reading')}<h2>Writing</h2>${wt}`;
  const fn=('Natija - '+nm+' - '+(M.title||'mock')).replace(/[\\/:*?"<>|]+/g,' ').trim()+'.pdf',
  pr=()=>{const d=document.createElement('div');d.id='rep';d.className='rp';d.innerHTML=H;document.body.append(d);const t0=document.title;document.title=fn.replace(/\.pdf$/,'');const fin=()=>{d.remove();document.title=t0;removeEventListener('afterprint',fin)};addEventListener('afterprint',fin);setTimeout(()=>window.print(),100)},
  lb=()=>window.html2pdf?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';s.onload=ok;s.onerror=no;document.head.append(s)}),
